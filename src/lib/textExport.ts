@@ -1,12 +1,5 @@
 import type { ParseResult, Rarity } from '../parser/parseCards';
 
-/** Discord-ready emojis: section + rarity color. */
-const EMOJI = {
-  trade: '🟡',
-  need: '🔴',
-  dupe: '×',
-} as const;
-
 /** Rarity color emojis for Discord paste (U=green, R=blue, E=purple, L=gold). */
 export const RARITY_EMOJI: Record<Rarity, string> = {
   U: '🟢',

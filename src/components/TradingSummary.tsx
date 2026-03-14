@@ -8,7 +8,7 @@ interface TradingSummaryProps {
 }
 
 export function TradingSummary({ tradeList, needList, themeClasses }: TradingSummaryProps) {
-  const tradeCount = tradeList.length;
+  const tradeCount = tradeList.reduce((sum, e) => sum + e.count, 0); // total copies to trade
   const needCount = needList.length;
   const t = themeClasses;
   const tradeHeading = t?.trade ?? 'text-amber-300';

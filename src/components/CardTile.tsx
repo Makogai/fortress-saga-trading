@@ -60,7 +60,7 @@ export function CardTile({ card, editable, colorTheme = 'warm', onCountChange }:
           <span
             className={`shrink-0 rounded px-2 md:px-1.5 py-0.5 text-xs md:text-[10px] font-bold ${tradeBadge}`}
           >
-            TRADE ×{card.count}
+            TRADE ×{card.count - 1}
           </span>
         )}
         {isMissing && !editable && (
@@ -92,7 +92,7 @@ export function CardTile({ card, editable, colorTheme = 'warm', onCountChange }:
         <div
           className={`px-3 md:px-1.5 pb-2 md:pb-1 text-xs md:text-[10px] font-bold ${colorTheme === 'cool' ? 'text-indigo-300' : colorTheme === 'forest' ? 'text-teal-300' : 'text-amber-400'}`}
         >
-          ×{card.count}
+          ×{card.count - 1}
         </div>
       )}
     </div>

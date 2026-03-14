@@ -53,7 +53,7 @@ export function TradingOnlyPanel({
           className={`rounded-lg border ${sectionBorder} ${sectionTradeBg} p-3`}
         >
           <h3 className={`text-sm font-bold ${headingTrade} mb-2`}>
-            TRADE (dupes — how many I have)
+            TRADE (dupes — how many to trade)
           </h3>
           {tradeList.length === 0 ? (
             <p className={`text-sm italic ${albumLabel}`}>None</p>

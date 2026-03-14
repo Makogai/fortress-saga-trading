@@ -30,7 +30,7 @@ export function buildTextExport(data: ParseResult): string {
   lines.push('**Fortress Saga — Trading**');
   lines.push('');
 
-  lines.push('**TRADE** (dupes — how many I have)');
+  lines.push('**TRADE** (dupes — how many to trade)');
   if (data.tradeList.length === 0) {
     lines.push('_None_');
   } else {

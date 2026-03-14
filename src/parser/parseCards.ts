@@ -80,7 +80,7 @@ export function parseCardsText(text: string): ParseResult {
         allTrade.push({
           album: albumTitle,
           name: card.name,
-          count: card.count,
+          count: card.count - 1, // number available to trade (duplicates only)
           rarity: card.rarity,
         });
       }
@@ -137,7 +137,7 @@ export function resultFromAlbums(albums: Album[]): ParseResult {
         tradeList.push({
           album: album.title,
           name: card.name,
-          count: card.count,
+          count: card.count - 1, // number available to trade (duplicates only)
           rarity: card.rarity,
         });
       }

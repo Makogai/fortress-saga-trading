@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import type { CatalogAlbum } from '../data/catalog';
 import type { ParseResult } from '../parser/parseCards';
 import type { ThemeClasses } from '../lib/themes';
-import { CATALOG } from '../data/catalog';
 import { titleToSlug, getAlbumCoverUrl, getSeasonCoverUrl } from '../lib/albumSlug';
 
 function AlbumCoverImage({
@@ -65,6 +65,7 @@ function getAlbumProgress(data: ParseResult | null, albumTitle: string): number 
 }
 
 interface AlbumsShelfProps {
+  catalog: CatalogAlbum[];
   data: ParseResult | null;
   onOpenAlbum: (slug: string) => void;
   onNavigateTracker: () => void;
@@ -74,9 +75,9 @@ interface AlbumsShelfProps {
   themeClasses: ThemeClasses;
 }
 
-export function AlbumsShelf({ data, onOpenAlbum, onNavigateTracker, favorites, onToggleFavorite, isDark, themeClasses }: AlbumsShelfProps) {
+export function AlbumsShelf({ catalog, data, onOpenAlbum, onNavigateTracker, favorites, onToggleFavorite, isDark, themeClasses }: AlbumsShelfProps) {
   const t = themeClasses;
-  const totalCards = CATALOG.length * CARDS_PER_ALBUM;
+  const totalCards = catalog.length * CARDS_PER_ALBUM;
   const totalOwned = data
     ? data.albums.reduce(
         (sum, a) => sum + a.cards.filter((c) => c.count >= 1).length,
@@ -94,7 +95,7 @@ export function AlbumsShelf({ data, onOpenAlbum, onNavigateTracker, favorites, o
           <div className={`mb-4 rounded-xl border-2 p-3 flex flex-wrap items-center gap-2 ${themeClasses.surface} ${themeClasses.border}`}>
             <span className={`text-sm font-semibold ${themeClasses.primary}`}>Favorites</span>
             {favorites.map((slug) => {
-              const album = CATALOG.find((a) => titleToSlug(a.title) === slug);
+              const album = catalog.find((a) => titleToSlug(a.title) === slug);
               if (!album) return null;
               return (
                 <button
@@ -172,7 +173,7 @@ export function AlbumsShelf({ data, onOpenAlbum, onNavigateTracker, favorites, o
                 </p>
               )}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 flex-1 min-h-0 content-start">
-                {CATALOG.map((album) => {
+                {catalog.map((album) => {
                   const slug = titleToSlug(album.title);
                   const owned = getAlbumProgress(data, album.title);
                   const progress = owned / CARDS_PER_ALBUM;

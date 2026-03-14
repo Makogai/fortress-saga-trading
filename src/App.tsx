@@ -6,15 +6,17 @@ import {
   setCardCount,
   type ParseResult,
 } from './parser/parseCards';
-import { defaultCounts, catalogToAlbums, CATALOG } from './data/catalog';
+import { defaultCounts, catalogToAlbums } from './data/catalog';
+import type { CatalogAlbum } from './data/catalog';
+import { SEASONS, getCatalog, getDefaultSeasonId, isValidSeasonId } from './data/seasons';
 import { titleToSlug } from './lib/albumSlug';
-import { loadFromStorage, saveToStorage } from './lib/storage';
+import { loadFromStorage, saveToStorage, loadCurrentSeasonId, saveCurrentSeasonId } from './lib/storage';
 import { loadGoals, saveGoals } from './lib/goalsStorage';
 import { loadFavorites, saveFavorites } from './lib/favoritesStorage';
 import { buildBackup, downloadBackup, parseBackupFile } from './lib/backup';
 import { buildTextExport } from './lib/textExport';
 import { parseCountsOnly, applyCounts } from './lib/importCounts';
-import { buildShareUrl, decodeState, stateToResult } from './lib/shareLink';
+import { buildShareUrl, decodeState, decodeStateFromUrl, getSharePayloadFromUrl, stateToResult } from './lib/shareLink';
 import type { RarityFilter } from './lib/filterCards';
 import {
   getThemeClasses,
@@ -28,6 +30,7 @@ import { TradingSummary } from './components/TradingSummary';
 import { TradingOnlyPanel } from './components/TradingOnlyPanel';
 import { FormatGuide } from './components/FormatGuide';
 import { ShareQrModal } from './components/ShareQrModal';
+import { ImportLinkModal } from './components/ImportLinkModal';
 import { WelcomeModal, getWelcomeSeen } from './components/WelcomeModal';
 import { AppHeader } from './components/AppHeader';
 import { AlbumsShelf } from './pages/AlbumsShelf';
@@ -54,14 +57,16 @@ const VIEW_MODES: { value: ViewMode; label: string }[] = [
   { value: 'counts', label: 'Counts' },
 ];
 
-/** Clean slate: catalog with all counts 0. */
-function getCleanSlate(): ParseResult {
-  return resultFromAlbums(catalogToAlbums(defaultCounts()));
+/** Clean slate for a given catalog (all counts 0). */
+function getCleanSlate(catalog: CatalogAlbum[]): ParseResult {
+  return resultFromAlbums(catalogToAlbums(defaultCounts(catalog), catalog));
 }
 
 export default function App() {
   const [route, setRoute] = useState<Route>(() => parseHash());
-  const [data, setData] = useState<ParseResult | null>(() => getCleanSlate());
+  const [currentSeasonId, setCurrentSeasonId] = useState<string>(() => loadCurrentSeasonId() ?? getDefaultSeasonId());
+  const catalog: CatalogAlbum[] = getCatalog(currentSeasonId) ?? SEASONS[0].catalog;
+  const [data, setData] = useState<ParseResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [theme, setTheme] = useState<Theme>('dark');
@@ -79,16 +84,18 @@ export default function App() {
   const [shareDone, setShareDone] = useState(false);
   const [showFormatGuide, setShowFormatGuide] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [showImportLinkModal, setShowImportLinkModal] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [undoHistory, setUndoHistory] = useState<ParseResult[]>([]);
-  const [goals, setGoals] = useState<string[]>(() => loadGoals());
-  const [favorites, setFavorites] = useState<string[]>(() => loadFavorites());
+  const [goals, setGoals] = useState<string[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
   const fullCaptureRef = useRef<HTMLDivElement>(null);
   const tradingCaptureRef = useRef<HTMLDivElement>(null);
   const importCountsInputRef = useRef<HTMLInputElement>(null);
   const fullImportInputRef = useRef<HTMLInputElement>(null);
   const restoreBackupInputRef = useRef<HTMLInputElement>(null);
+  const appliedShareSeasonRef = useRef<string | null>(null);
 
   // Sticky export bar: show when export section is not in view
   useEffect(() => {
@@ -130,7 +137,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [route, data, isReadOnly, showFormatGuide, showWelcome]);
+  }, [route, data, isReadOnly, showFormatGuide, showImportLinkModal, showWelcome]);
 
   const showSaved = useCallback(() => {
     setSavedToast(true);
@@ -153,7 +160,7 @@ export default function App() {
       } else {
         setData(result);
         setUndoHistory([]);
-        saveToStorage({ albums: result.albums });
+        saveToStorage(currentSeasonId, { albums: result.albums });
         onSuccess?.();
       }
     } catch (e) {
@@ -161,26 +168,33 @@ export default function App() {
       setData(null);
       setUndoHistory([]);
     }
-  }, []);
+  }, [currentSeasonId]);
 
-  // Initial load: URL hash (share link) first, then storage, else keep clean slate; show welcome for new visitors
+  // Load data, goals, favorites for current season (and on season switch)
   useEffect(() => {
-    const hash = typeof window !== 'undefined' ? window.location.hash : '';
-    const counts = decodeState(hash);
+    const payload = getSharePayloadFromUrl();
+    const counts = payload ? decodeState(payload, catalog) : null;
     if (counts) {
-      const result = stateToResult(counts);
-      setData(result);
+      appliedShareSeasonRef.current = currentSeasonId;
+      setData(stateToResult(counts, catalog));
       setIsReadOnly(true);
-      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      window.history.replaceState(null, '', window.location.pathname);
+      setGoals(loadGoals(currentSeasonId));
+      setFavorites(loadFavorites(currentSeasonId));
       return;
     }
-    const stored = loadFromStorage();
+    if (appliedShareSeasonRef.current === currentSeasonId) return;
+    appliedShareSeasonRef.current = null;
+    const stored = loadFromStorage(currentSeasonId);
     if (stored?.albums?.length) {
       setData(resultFromAlbums(stored.albums));
-    } else if (!getWelcomeSeen()) {
-      setShowWelcome(true);
+    } else {
+      setData(getCleanSlate(catalog));
+      if (!getWelcomeSeen()) setShowWelcome(true);
     }
-  }, []);
+    setGoals(loadGoals(currentSeasonId));
+    setFavorites(loadFavorites(currentSeasonId));
+  }, [currentSeasonId]); // eslint-disable-line react-hooks/exhaustive-deps -- catalog is derived from currentSeasonId
 
   const handleImportCounts = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -190,12 +204,12 @@ export default function App() {
       reader.onload = () => {
         const text = String(reader.result ?? '');
         setError(null);
-        const parsed = parseCountsOnly(text);
+        const parsed = parseCountsOnly(text, catalog);
         if (parsed.success) {
-          const result = applyCounts(parsed.counts);
+          const result = applyCounts(parsed.counts, catalog);
           setData(result);
           setUndoHistory([]);
-          saveToStorage({ albums: result.albums });
+          saveToStorage(currentSeasonId, { albums: result.albums });
           showSaved();
         } else {
           setError(parsed.message);
@@ -205,7 +219,7 @@ export default function App() {
       reader.readAsText(file);
       e.target.value = '';
     },
-    [showSaved]
+    [catalog, currentSeasonId, showSaved]
   );
 
   const handleFile = useCallback(
@@ -225,12 +239,13 @@ export default function App() {
   );
 
   const handleResetToCleanSlate = useCallback(() => {
-    setData(getCleanSlate());
+    const slate = getCleanSlate(catalog);
+    setData(slate);
     setUndoHistory([]);
-    saveToStorage({ albums: getCleanSlate().albums });
+    saveToStorage(currentSeasonId, { albums: slate.albums });
     setError(null);
     showSaved();
-  }, [showSaved]);
+  }, [catalog, currentSeasonId, showSaved]);
 
   const handleCopyShareLink = useCallback(() => {
     if (!data) return;
@@ -272,10 +287,10 @@ export default function App() {
       const next = setCardCount(data, albumTitle, cardIndex, count);
       setUndoHistory((prev) => [JSON.parse(JSON.stringify(data)), ...prev].slice(0, 10));
       setData(next);
-      saveToStorage({ albums: next.albums });
+      saveToStorage(currentSeasonId, { albums: next.albums });
       showSaved();
     },
-    [data, showSaved]
+    [data, currentSeasonId, showSaved]
   );
 
   const handleUndo = useCallback(() => {
@@ -283,40 +298,40 @@ export default function App() {
     const prev = undoHistory[0];
     setUndoHistory((h) => h.slice(1));
     setData(prev);
-    saveToStorage({ albums: prev.albums });
+    saveToStorage(currentSeasonId, { albums: prev.albums });
     showSaved();
-  }, [undoHistory, showSaved]);
+  }, [undoHistory, currentSeasonId, showSaved]);
 
   const handleAddGoal = useCallback((albumTitle: string) => {
     setGoals((prev) => {
       if (prev.includes(albumTitle)) return prev;
       const next = [...prev, albumTitle];
-      saveGoals(next);
+      saveGoals(currentSeasonId, next);
       return next;
     });
-  }, []);
+  }, [currentSeasonId]);
 
   const handleRemoveGoal = useCallback((albumTitle: string) => {
     setGoals((prev) => {
       const next = prev.filter((t) => t !== albumTitle);
-      saveGoals(next);
+      saveGoals(currentSeasonId, next);
       return next;
     });
-  }, []);
+  }, [currentSeasonId]);
 
   const handleToggleFavorite = useCallback((slug: string) => {
     setFavorites((prev) => {
       const next = prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug];
-      saveFavorites(next);
+      saveFavorites(currentSeasonId, next);
       return next;
     });
-  }, []);
+  }, [currentSeasonId]);
 
   const handleDownloadBackup = useCallback(() => {
     if (!data) return;
-    const backup = buildBackup(data.albums);
+    const backup = buildBackup(data.albums, currentSeasonId);
     downloadBackup(backup);
-  }, [data]);
+  }, [data, currentSeasonId]);
 
   const handleRestoreBackup = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -328,14 +343,19 @@ export default function App() {
         setError(null);
         const result = parseBackupFile(text);
         if (result.success) {
+          const backupSeasonId = result.data.seasonId && isValidSeasonId(result.data.seasonId)
+            ? result.data.seasonId
+            : currentSeasonId;
+          setCurrentSeasonId(backupSeasonId);
+          saveCurrentSeasonId(backupSeasonId);
           const restored = resultFromAlbums(result.data.albums);
           setData(restored);
           setUndoHistory([]);
-          saveToStorage({ albums: restored.albums });
+          saveToStorage(backupSeasonId, { albums: restored.albums });
           setGoals(result.data.goals);
-          saveGoals(result.data.goals);
+          saveGoals(backupSeasonId, result.data.goals);
           setFavorites(result.data.favorites);
-          saveFavorites(result.data.favorites);
+          saveFavorites(backupSeasonId, result.data.favorites);
           showSaved();
         } else {
           setError(result.message);
@@ -345,7 +365,21 @@ export default function App() {
       reader.readAsText(file);
       e.target.value = '';
     },
-    [showSaved]
+    [currentSeasonId, showSaved]
+  );
+
+  const handleImportFromLink = useCallback(
+    (url: string): { success: boolean; message?: string } => {
+      const counts = decodeStateFromUrl(url, catalog);
+      if (!counts) return { success: false, message: 'Invalid or unsupported link' };
+      setData(stateToResult(counts, catalog));
+      setUndoHistory([]);
+      saveToStorage(currentSeasonId, { albums: stateToResult(counts, catalog).albums });
+      setIsReadOnly(false);
+      showSaved();
+      return { success: true };
+    },
+    [catalog, currentSeasonId, showSaved]
   );
 
   const handleExportPng = useCallback(async () => {
@@ -391,7 +425,7 @@ export default function App() {
   const albumSlug = route !== 'tracker' && route !== 'albums' ? route.slug : null;
   const albumCatalogIndex =
     albumSlug != null
-      ? CATALOG.findIndex((a) => titleToSlug(a.title) === albumSlug)
+      ? catalog.findIndex((a) => titleToSlug(a.title) === albumSlug)
       : -1;
   const albumData =
     albumCatalogIndex >= 0 && data ? data.albums[albumCatalogIndex] ?? null : null;
@@ -421,7 +455,7 @@ export default function App() {
   // Albums shelf page
   if (route === 'albums') {
     return (
-      <>
+      <div className={`min-h-screen ${isDark ? 'bg-stone-950' : 'bg-stone-100'}`}>
         {restoreBackupInput}
         <AppHeader
           isDark={isDark}
@@ -437,6 +471,7 @@ export default function App() {
           onFormatGuide={() => setShowFormatGuide(true)}
           onImportCounts={handleImportCounts}
           onFullImport={handleFile}
+          onOpenImportLinkModal={() => setShowImportLinkModal(true)}
           onReset={handleResetToCleanSlate}
         onShare={handleShare}
         onDownloadBackup={handleDownloadBackup}
@@ -450,6 +485,7 @@ export default function App() {
         onNavigateAlbums={goToAlbums}
       />
         <AlbumsShelf
+          catalog={catalog}
           data={data}
           onOpenAlbum={openAlbum}
           onNavigateTracker={goToTracker}
@@ -463,14 +499,23 @@ export default function App() {
             Saved
           </div>
         )}
-      </>
+        {showImportLinkModal && (
+          <ImportLinkModal
+            onClose={() => setShowImportLinkModal(false)}
+            onImport={handleImportFromLink}
+            isDark={isDark}
+            themeClasses={themeClasses}
+            primaryBtn={primaryBtn}
+          />
+        )}
+      </div>
     );
   }
 
   // Single album detail page
   if (albumSlug) {
     return (
-      <>
+      <div className={`min-h-screen ${isDark ? 'bg-stone-950' : 'bg-stone-100'}`}>
         {restoreBackupInput}
         <AppHeader
           isDark={isDark}
@@ -486,6 +531,7 @@ export default function App() {
           onFormatGuide={() => setShowFormatGuide(true)}
           onImportCounts={handleImportCounts}
           onFullImport={handleFile}
+          onOpenImportLinkModal={() => setShowImportLinkModal(true)}
           onReset={handleResetToCleanSlate}
         onShare={handleShare}
         onDownloadBackup={handleDownloadBackup}
@@ -499,11 +545,12 @@ export default function App() {
         onNavigateAlbums={goToAlbums}
         />
         <AlbumDetail
+          catalog={catalog}
           slug={albumSlug}
           albumData={albumData}
           onBack={goToAlbums}
-          onPrev={albumCatalogIndex > 0 ? () => openAlbum(titleToSlug(CATALOG[albumCatalogIndex - 1].title)) : undefined}
-          onNext={albumCatalogIndex >= 0 && albumCatalogIndex < CATALOG.length - 1 ? () => openAlbum(titleToSlug(CATALOG[albumCatalogIndex + 1].title)) : undefined}
+          onPrev={albumCatalogIndex > 0 ? () => openAlbum(titleToSlug(catalog[albumCatalogIndex - 1].title)) : undefined}
+          onNext={albumCatalogIndex >= 0 && albumCatalogIndex < catalog.length - 1 ? () => openAlbum(titleToSlug(catalog[albumCatalogIndex + 1].title)) : undefined}
           isFavorite={favorites.includes(albumSlug)}
           onToggleFavorite={() => handleToggleFavorite(albumSlug)}
           isDark={isDark}
@@ -519,7 +566,16 @@ export default function App() {
             Saved
           </div>
         )}
-      </>
+        {showImportLinkModal && (
+          <ImportLinkModal
+            onClose={() => setShowImportLinkModal(false)}
+            onImport={handleImportFromLink}
+            isDark={isDark}
+            themeClasses={themeClasses}
+            primaryBtn={primaryBtn}
+          />
+        )}
+      </div>
     );
   }
 
@@ -545,6 +601,7 @@ export default function App() {
         onFormatGuide={() => setShowFormatGuide(true)}
         onImportCounts={handleImportCounts}
         onFullImport={handleFile}
+        onOpenImportLinkModal={() => setShowImportLinkModal(true)}
         onReset={handleResetToCleanSlate}
         onShare={handleShare}
         onDownloadBackup={handleDownloadBackup}
@@ -583,7 +640,41 @@ export default function App() {
         />
       )}
 
+      {showImportLinkModal && (
+        <ImportLinkModal
+          onClose={() => setShowImportLinkModal(false)}
+          onImport={handleImportFromLink}
+          isDark={isDark}
+          themeClasses={themeClasses}
+          primaryBtn={primaryBtn}
+        />
+      )}
+
       <main className="container mx-auto px-5 sm:px-5 py-6 sm:py-6 max-w-6xl pb-safe">
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <label htmlFor="season-select" className={`text-sm font-medium ${themeClasses.textMuted}`}>
+            Season
+          </label>
+          <select
+            id="season-select"
+            value={currentSeasonId}
+            onChange={(e) => {
+              const id = e.target.value;
+              if (id && isValidSeasonId(id)) {
+                setCurrentSeasonId(id);
+                saveCurrentSeasonId(id);
+              }
+            }}
+            className={`rounded-lg border px-3 py-2 text-sm ${themeClasses.border} ${themeClasses.surface} ${themeClasses.text}`}
+            aria-label="Select season"
+          >
+            {SEASONS.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        </div>
         {error && (
           <div
             className={`mb-3 rounded border px-3 py-2 text-sm ${
@@ -607,7 +698,11 @@ export default function App() {
             </p>
             <button
               type="button"
-              onClick={() => setData(getCleanSlate())}
+              onClick={() => {
+                const slate = getCleanSlate(catalog);
+                setData(slate);
+                saveToStorage(currentSeasonId, { albums: slate.albums });
+              }}
               className={`rounded px-3 py-2 text-sm font-medium ${primaryBtn}`}
             >
               Start with clean slate

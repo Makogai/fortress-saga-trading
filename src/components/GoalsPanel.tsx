@@ -19,6 +19,15 @@ export function GoalsPanel({ data, themeClasses, goals, onAddGoal, onRemoveGoal 
     return { owned, total: album.cards.length };
   };
 
+  const isCompleted = (albumTitle: string) => {
+    const { owned, total } = progress(albumTitle);
+    return total > 0 && owned >= total;
+  };
+
+  const albumTitlesAvailableForGoal = albumTitles.filter(
+    (title) => !goals.includes(title) && !isCompleted(title)
+  );
+
   return (
     <div className={`rounded-xl border p-4 ${t.border} ${t.surfaceAlt}`}>
       <div className={`text-sm font-medium ${t.textMuted} mb-3`}>Goals</div>
@@ -59,7 +68,7 @@ export function GoalsPanel({ data, themeClasses, goals, onAddGoal, onRemoveGoal 
           })}
         </ul>
       )}
-      {albumTitles.filter((title) => !goals.includes(title)).length > 0 && (
+      {albumTitlesAvailableForGoal.length > 0 && (
         <div className="mt-3 pt-3 border-t border-stone-600/40">
           <label htmlFor="goals-add" className={`text-xs ${t.textMuted} block mb-1`}>
             Add goal
@@ -78,13 +87,11 @@ export function GoalsPanel({ data, themeClasses, goals, onAddGoal, onRemoveGoal 
             aria-label="Add goal album"
           >
             <option value="">Choose album…</option>
-            {albumTitles
-              .filter((title) => !goals.includes(title))
-              .map((title) => (
-                <option key={title} value={title}>
-                  {title}
-                </option>
-              ))}
+            {albumTitlesAvailableForGoal.map((title) => (
+              <option key={title} value={title}>
+                {title}
+              </option>
+            ))}
           </select>
         </div>
       )}

@@ -121,13 +121,13 @@ export function CardTile({ card, editable, colorTheme = 'warm', isDark = true, o
           </div>
         )}
       </div>
-      {isDuplicate && !editable && (
+      {/* {isDuplicate && !editable && (
         <div
           className={`px-3 md:px-1.5 pb-2 md:pb-1 text-xs md:text-[10px] font-bold ${isDark ? tradeTextClass : tradeTextClassLight}`}
         >
           ×{card.count - 1}
         </div>
-      )}
+      )} */}
     </div>
   );
 }

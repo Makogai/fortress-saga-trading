@@ -1,7 +1,7 @@
-import { CATALOG, catalogToAlbums } from '../data/catalog';
+import type { CatalogAlbum } from '../data/catalog';
+import { catalogToAlbums } from '../data/catalog';
 import { resultFromAlbums } from '../parser/parseCards';
 
-const ALBUMS_COUNT = CATALOG.length;
 const CARDS_PER_ALBUM = 10;
 
 export interface ImportCountsResult {
@@ -23,16 +23,17 @@ export interface ImportCountsError {
  *   1,1,1,2,1,2,2,1,1,1
  *   ...
  */
-export function parseCountsOnly(text: string): ImportCountsResult | ImportCountsError {
+export function parseCountsOnly(text: string, catalog: CatalogAlbum[]): ImportCountsResult | ImportCountsError {
   const lines = text
     .split(/\r?\n/)
     .map((l) => l.trim())
     .filter(Boolean);
 
-  if (lines.length !== ALBUMS_COUNT) {
+  const albumsCount = catalog.length;
+  if (lines.length !== albumsCount) {
     return {
       success: false,
-      message: `Expected ${ALBUMS_COUNT} lines (one per album), got ${lines.length}.`,
+      message: `Expected ${albumsCount} lines (one per album), got ${lines.length}.`,
     };
   }
 
@@ -43,7 +44,7 @@ export function parseCountsOnly(text: string): ImportCountsResult | ImportCounts
     if (parts.length !== CARDS_PER_ALBUM) {
       return {
         success: false,
-        message: `Line ${i + 1} (${CATALOG[i].title}): expected ${CARDS_PER_ALBUM} numbers, got ${parts.length}.`,
+        message: `Line ${i + 1} (${catalog[i].title}): expected ${CARDS_PER_ALBUM} numbers, got ${parts.length}.`,
       };
     }
     for (let j = 0; j < parts.length; j++) {
@@ -62,7 +63,7 @@ export function parseCountsOnly(text: string): ImportCountsResult | ImportCounts
 }
 
 /** Apply counts array to catalog and return ParseResult. */
-export function applyCounts(counts: number[]) {
-  const albums = catalogToAlbums(counts);
+export function applyCounts(counts: number[], catalog: CatalogAlbum[]) {
+  const albums = catalogToAlbums(counts, catalog);
   return resultFromAlbums(albums);
 }

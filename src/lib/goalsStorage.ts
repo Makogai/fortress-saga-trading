@@ -1,8 +1,12 @@
-const GOALS_KEY = 'fortress-saga-goals';
+const GOALS_KEY_PREFIX = 'fortress-saga-goals';
 
-export function loadGoals(): string[] {
+function getGoalsKey(seasonId: string): string {
+  return `${GOALS_KEY_PREFIX}-${seasonId}`;
+}
+
+export function loadGoals(seasonId: string): string[] {
   try {
-    const raw = localStorage.getItem(GOALS_KEY);
+    const raw = localStorage.getItem(getGoalsKey(seasonId));
     if (!raw) return [];
     const arr = JSON.parse(raw) as unknown;
     return Array.isArray(arr) && arr.every((x) => typeof x === 'string') ? arr : [];
@@ -11,9 +15,9 @@ export function loadGoals(): string[] {
   }
 }
 
-export function saveGoals(albumTitles: string[]): void {
+export function saveGoals(seasonId: string, albumTitles: string[]): void {
   try {
-    localStorage.setItem(GOALS_KEY, JSON.stringify(albumTitles));
+    localStorage.setItem(getGoalsKey(seasonId), JSON.stringify(albumTitles));
   } catch {
     // ignore
   }

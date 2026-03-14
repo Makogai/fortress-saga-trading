@@ -5,7 +5,7 @@ import type { Album } from '../parser/parseCards';
 import type { ThemeClasses } from '../lib/themes';
 import type { RarityFilter } from '../lib/filterCards';
 import { cardMatches } from '../lib/filterCards';
-import { CATALOG } from '../data/catalog';
+import type { CatalogAlbum } from '../data/catalog';
 import { titleToSlug, getCardImageUrl, getAlbumCoverUrl } from '../lib/albumSlug';
 
 const RARITY_BORDER: Record<string, string> = {
@@ -29,13 +29,14 @@ function AlbumPlaceholder({ isDark }: { isDark: boolean }) {
   );
 }
 
-function getAlbumBySlug(slug: string): { album: (typeof CATALOG)[0]; index: number } | null {
-  const i = CATALOG.findIndex((a) => titleToSlug(a.title) === slug);
+function getAlbumBySlug(slug: string, catalog: CatalogAlbum[]): { album: CatalogAlbum; index: number } | null {
+  const i = catalog.findIndex((a) => titleToSlug(a.title) === slug);
   if (i < 0) return null;
-  return { album: CATALOG[i], index: i };
+  return { album: catalog[i], index: i };
 }
 
 interface AlbumDetailProps {
+  catalog: CatalogAlbum[];
   slug: string;
   albumData: Album | null;
   onBack: () => void;
@@ -84,9 +85,9 @@ function CardImage({
   );
 }
 
-export function AlbumDetail({ slug, albumData, onBack, onPrev, onNext, isFavorite, onToggleFavorite, isDark, themeClasses, primaryBtn, searchQuery, setSearchQuery, rarityFilter, setRarityFilter }: AlbumDetailProps) {
+export function AlbumDetail({ catalog, slug, albumData, onBack, onPrev, onNext, isFavorite, onToggleFavorite, isDark, themeClasses, primaryBtn, searchQuery, setSearchQuery, rarityFilter, setRarityFilter }: AlbumDetailProps) {
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
-  const found = getAlbumBySlug(slug);
+  const found = getAlbumBySlug(slug, catalog);
   const coverUrl = getAlbumCoverUrl(slug);
   const t = themeClasses;
 

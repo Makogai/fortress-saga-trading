@@ -18,6 +18,7 @@ interface AppHeaderProps {
   onFormatGuide: () => void;
   onImportCounts: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onFullImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onOpenImportLinkModal?: () => void;
   onReset: () => void;
   onShare: () => void;
   onDownloadBackup?: () => void;
@@ -52,6 +53,7 @@ export function AppHeader({
   onFormatGuide,
   onImportCounts,
   onFullImport,
+  onOpenImportLinkModal,
   onReset,
   onShare,
   onDownloadBackup,
@@ -211,6 +213,15 @@ export function AppHeader({
                         >
                           Full import
                         </button>
+                        {onOpenImportLinkModal && (
+                          <button
+                            type="button"
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-stone-700/50"
+                            onClick={() => { onOpenImportLinkModal(); setDropdownOpen(false); }}
+                          >
+                            Import from link
+                          </button>
+                        )}
                         {hasData && onDownloadBackup && (
                           <button
                             type="button"
@@ -312,6 +323,11 @@ export function AppHeader({
                     <button type="button" onClick={() => { triggerFullImport(); setMobileOpen(false); }} className={`${btnBase} w-full text-left py-3.5 px-4 rounded-xl min-h-[48px] text-sm`}>
                       Full import
                     </button>
+                    {onOpenImportLinkModal && (
+                      <button type="button" onClick={() => { onOpenImportLinkModal(); setMobileOpen(false); }} className={`${btnBase} w-full text-left py-3.5 px-4 rounded-xl min-h-[48px] text-sm`}>
+                        Import from link
+                      </button>
+                    )}
                     {hasData && onDownloadBackup && (
                       <button type="button" onClick={() => { onDownloadBackup(); setMobileOpen(false); }} className={`${btnBase} w-full text-left py-3.5 px-4 rounded-xl min-h-[48px] text-sm`}>
                         Download backup

@@ -3,23 +3,25 @@ import type { Album, ParsedCard } from '../parser/parseCards';
 import { loadGoals } from './goalsStorage';
 import { loadFavorites } from './favoritesStorage';
 
-export const BACKUP_VERSION = 1;
+export const BACKUP_VERSION = 2;
 
 export interface BackupData {
   version: number;
   exportedAt: string;
+  seasonId?: string;
   albums: StoredData['albums'];
   goals: string[];
   favorites: string[];
 }
 
-export function buildBackup(albums: StoredData['albums']): BackupData {
+export function buildBackup(albums: StoredData['albums'], seasonId: string): BackupData {
   return {
     version: BACKUP_VERSION,
     exportedAt: new Date().toISOString(),
+    seasonId,
     albums,
-    goals: loadGoals(),
-    favorites: loadFavorites(),
+    goals: loadGoals(seasonId),
+    favorites: loadFavorites(seasonId),
   };
 }
 
@@ -70,7 +72,7 @@ export function parseBackupFile(json: string): { success: true; data: BackupData
     if (!data || typeof data !== 'object' || !('albums' in data)) {
       return { success: false, message: 'Invalid backup: missing albums' };
     }
-    const b = data as { version?: number; exportedAt?: string; albums: unknown; goals?: unknown; favorites?: unknown };
+    const b = data as { version?: number; exportedAt?: string; seasonId?: string; albums: unknown; goals?: unknown; favorites?: unknown };
     if (!Array.isArray(b.albums) || b.albums.length === 0) {
       return { success: false, message: 'Invalid backup: no albums' };
     }
@@ -87,6 +89,7 @@ export function parseBackupFile(json: string): { success: true; data: BackupData
       data: {
         version: typeof b.version === 'number' ? b.version : BACKUP_VERSION,
         exportedAt: typeof b.exportedAt === 'string' ? b.exportedAt : new Date().toISOString(),
+        seasonId: typeof b.seasonId === 'string' ? b.seasonId : undefined,
         albums,
         goals: Array.isArray(b.goals) && b.goals.every((g) => typeof g === 'string') ? b.goals : [],
         favorites: Array.isArray(b.favorites) && b.favorites.every((f) => typeof f === 'string') ? b.favorites : [],

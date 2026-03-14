@@ -143,10 +143,10 @@ export const CATALOG: CatalogAlbum[] = [
 const SLOTS_PER_ALBUM = 10;
 
 /** Create albums with counts from a flat array: counts[i] = count for catalog slot i (row-major: album by album, 10 per album). */
-export function catalogToAlbums(counts: number[]): Album[] {
+export function catalogToAlbums(counts: number[], catalog: CatalogAlbum[] = CATALOG): Album[] {
   const albums: Album[] = [];
   let idx = 0;
-  for (const album of CATALOG) {
+  for (const album of catalog) {
     const cards: ParsedCard[] = album.cards.map((c) => {
       const count = counts[idx++] ?? 0;
       const status =
@@ -159,11 +159,11 @@ export function catalogToAlbums(counts: number[]): Album[] {
 }
 
 /** Total number of slots (albums × 10). */
-export function catalogSlotCount(): number {
-  return CATALOG.length * SLOTS_PER_ALBUM;
+export function catalogSlotCount(catalog: CatalogAlbum[] = CATALOG): number {
+  return catalog.length * SLOTS_PER_ALBUM;
 }
 
 /** Get default counts (all 0) for clean slate. */
-export function defaultCounts(): number[] {
-  return new Array(catalogSlotCount()).fill(0);
+export function defaultCounts(catalog: CatalogAlbum[] = CATALOG): number[] {
+  return new Array(catalogSlotCount(catalog)).fill(0);
 }

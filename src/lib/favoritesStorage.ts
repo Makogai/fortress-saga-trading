@@ -1,8 +1,12 @@
-const FAVORITES_KEY = 'fortress-saga-favorites';
+const FAVORITES_KEY_PREFIX = 'fortress-saga-favorites';
 
-export function loadFavorites(): string[] {
+function getFavoritesKey(seasonId: string): string {
+  return `${FAVORITES_KEY_PREFIX}-${seasonId}`;
+}
+
+export function loadFavorites(seasonId: string): string[] {
   try {
-    const raw = localStorage.getItem(FAVORITES_KEY);
+    const raw = localStorage.getItem(getFavoritesKey(seasonId));
     if (!raw) return [];
     const arr = JSON.parse(raw) as unknown;
     return Array.isArray(arr) && arr.every((x) => typeof x === 'string') ? arr : [];
@@ -11,9 +15,9 @@ export function loadFavorites(): string[] {
   }
 }
 
-export function saveFavorites(slugs: string[]): void {
+export function saveFavorites(seasonId: string, slugs: string[]): void {
   try {
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(slugs));
+    localStorage.setItem(getFavoritesKey(seasonId), JSON.stringify(slugs));
   } catch {
     // ignore
   }

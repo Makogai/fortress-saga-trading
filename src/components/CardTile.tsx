@@ -6,6 +6,26 @@ import {
   type ColorTheme,
 } from '../lib/themes';
 
+function getHaveTileClassesLight(colorTheme: ColorTheme): string {
+  const map: Record<ColorTheme, string> = {
+    warm: 'border-l-emerald-500 border border-emerald-400/50 bg-emerald-50',
+    cool: 'border-l-emerald-500 border border-emerald-400/50 bg-emerald-50',
+    forest: 'border-l-green-500 border border-green-400/50 bg-green-50',
+    season: 'border-l-emerald-500 border border-emerald-400/50 bg-emerald-50',
+  };
+  return map[colorTheme];
+}
+
+function getTradeTileClassesLight(colorTheme: ColorTheme): string {
+  const map: Record<ColorTheme, string> = {
+    warm: 'border-l-amber-500 border border-amber-400/50 bg-amber-50',
+    cool: 'border-l-indigo-500 border border-indigo-400/50 bg-indigo-50',
+    forest: 'border-l-teal-500 border border-teal-400/50 bg-teal-50',
+    season: 'border-l-[#D69858] border border-[#D69858]/70 bg-amber-50',
+  };
+  return map[colorTheme];
+}
+
 const RARITY_CLASSES: Record<string, { badge: string; border: string }> = {
   U: { badge: 'bg-green-600/90 text-green-100', border: 'border-green-500/40' },
   R: { badge: 'bg-blue-600/90 text-blue-100', border: 'border-blue-500/40' },
@@ -24,24 +44,36 @@ interface CardTileProps {
   card: ParsedCard;
   editable?: boolean;
   colorTheme?: ColorTheme;
+  isDark?: boolean;
   onCountChange?: (count: number) => void;
 }
 
-export function CardTile({ card, editable, colorTheme = 'warm', onCountChange }: CardTileProps) {
+export function CardTile({ card, editable, colorTheme = 'warm', isDark = true, onCountChange }: CardTileProps) {
   const styles = RARITY_CLASSES[card.rarity] ?? RARITY_CLASSES.U;
   const isMissing = card.status === 'missing';
   const isDuplicate = card.status === 'duplicate';
   const owned = card.status === 'owned';
 
-  const haveClasses = getHaveTileClasses(colorTheme);
-  const tradeClasses = getTradeTileClasses(colorTheme);
+  const haveClasses = isDark ? getHaveTileClasses(colorTheme) : getHaveTileClassesLight(colorTheme);
+  const tradeClasses = isDark ? getTradeTileClasses(colorTheme) : getTradeTileClassesLight(colorTheme);
   const tradeBadge = TRADE_BADGE[colorTheme];
+
+  const missingClasses = isDark
+    ? 'border-l-rose-500 border border-rose-500/60 bg-rose-950/25'
+    : 'border-l-rose-500 border border-rose-400/60 bg-rose-50';
+  const nameClass = isDark ? 'text-stone-100' : 'text-stone-800';
+  const inputClass = isDark
+    ? 'border-stone-500/50 bg-stone-900 text-stone-100'
+    : 'border-stone-400 bg-white text-stone-800';
+  const tradeTextClass = colorTheme === 'cool' ? 'text-indigo-300' : colorTheme === 'forest' ? 'text-teal-300' : 'text-amber-400';
+  const tradeTextClassLight = colorTheme === 'cool' ? 'text-indigo-700' : colorTheme === 'forest' ? 'text-teal-700' : 'text-amber-700';
+  const missingIconClass = isDark ? 'text-rose-400' : 'text-rose-600';
 
   return (
     <div
       className={`
         relative rounded-xl border flex flex-col justify-center border-l-4
-        ${isMissing ? 'min-h-[3.5rem] md:min-h-[2.75rem] py-3 px-4 md:py-2.5 md:px-3 border-l-rose-500 border border-rose-500/60 bg-rose-950/25' : 'min-h-[3.5rem] md:min-h-[2.5rem]'}
+        ${isMissing ? `min-h-[3.5rem] md:min-h-[2.75rem] py-3 px-4 md:py-2.5 md:px-3 ${missingClasses}` : 'min-h-[3.5rem] md:min-h-[2.5rem]'}
         ${owned ? haveClasses : ''}
         ${isDuplicate ? tradeClasses : ''}
         ${!isMissing ? 'md:rounded-lg' : ''}
@@ -54,7 +86,7 @@ export function CardTile({ card, editable, colorTheme = 'warm', onCountChange }:
         >
           {card.rarity}
         </span>
-        <span className="text-stone-100 text-sm md:text-xs font-medium leading-snug break-words flex-1 min-w-0">
+        <span className={`${nameClass} text-sm md:text-xs font-medium leading-snug break-words flex-1 min-w-0`}>
           {card.name}
         </span>
         {isDuplicate && (
@@ -66,7 +98,7 @@ export function CardTile({ card, editable, colorTheme = 'warm', onCountChange }:
         )}
         {isMissing && !editable && (
           <span
-            className="text-rose-400 text-lg md:text-sm shrink-0"
+            className={`${missingIconClass} text-lg md:text-sm shrink-0`}
             title="Missing"
           >
             ❌
@@ -83,7 +115,7 @@ export function CardTile({ card, editable, colorTheme = 'warm', onCountChange }:
                 const n = parseInt(e.target.value, 10);
                 if (!Number.isNaN(n) && n >= 0) onCountChange?.(n);
               }}
-              className="w-12 md:w-9 h-10 md:h-9 rounded-lg md:rounded border border-stone-500/50 bg-stone-900 text-stone-100 text-base md:text-xs text-center touch-manipulation"
+              className={`w-12 md:w-9 h-10 md:h-9 rounded-lg md:rounded border text-base md:text-xs text-center touch-manipulation ${inputClass}`}
               aria-label={`Count for ${card.name}`}
             />
           </div>
@@ -91,7 +123,7 @@ export function CardTile({ card, editable, colorTheme = 'warm', onCountChange }:
       </div>
       {isDuplicate && !editable && (
         <div
-          className={`px-3 md:px-1.5 pb-2 md:pb-1 text-xs md:text-[10px] font-bold ${colorTheme === 'cool' ? 'text-indigo-300' : colorTheme === 'forest' ? 'text-teal-300' : 'text-amber-400'}`}
+          className={`px-3 md:px-1.5 pb-2 md:pb-1 text-xs md:text-[10px] font-bold ${isDark ? tradeTextClass : tradeTextClassLight}`}
         >
           ×{card.count - 1}
         </div>

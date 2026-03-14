@@ -1,5 +1,10 @@
 import type { Rarity, Album, ParsedCard } from '../parser/parseCards';
 
+/**
+ * Single-season catalog (Forest of Order). Multi-season support could add a season id
+ * and multiple catalog sources with a selector in the UI.
+ */
+
 /** One card in the catalog (no count — count comes from user input or import). */
 export interface CatalogCard {
   rarity: Rarity;

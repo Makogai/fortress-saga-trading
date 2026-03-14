@@ -67,11 +67,14 @@ function getAlbumProgress(data: ParseResult | null, albumTitle: string): number 
 interface AlbumsShelfProps {
   data: ParseResult | null;
   onOpenAlbum: (slug: string) => void;
+  onNavigateTracker: () => void;
+  favorites: string[];
+  onToggleFavorite: (slug: string) => void;
   isDark: boolean;
   themeClasses: ThemeClasses;
 }
 
-export function AlbumsShelf({ data, onOpenAlbum, isDark, themeClasses }: AlbumsShelfProps) {
+export function AlbumsShelf({ data, onOpenAlbum, onNavigateTracker, favorites, onToggleFavorite, isDark, themeClasses }: AlbumsShelfProps) {
   const t = themeClasses;
   const totalCards = CATALOG.length * CARDS_PER_ALBUM;
   const totalOwned = data
@@ -87,6 +90,25 @@ export function AlbumsShelf({ data, onOpenAlbum, isDark, themeClasses }: AlbumsS
       className={`min-h-screen pb-safe ${isDark ? 'bg-stone-950' : 'bg-stone-100'}`}
     >
       <div className="container mx-auto px-5 py-6 max-w-7xl">
+        {favorites.length > 0 && (
+          <div className={`mb-4 rounded-xl border-2 p-3 flex flex-wrap items-center gap-2 ${themeClasses.surface} ${themeClasses.border}`}>
+            <span className={`text-sm font-semibold ${themeClasses.primary}`}>Favorites</span>
+            {favorites.map((slug) => {
+              const album = CATALOG.find((a) => titleToSlug(a.title) === slug);
+              if (!album) return null;
+              return (
+                <button
+                  key={slug}
+                  type="button"
+                  onClick={() => onOpenAlbum(slug)}
+                  className={`rounded-lg border px-3 py-1.5 text-sm font-medium ${themeClasses.border} ${themeClasses.surfaceAlt} ${themeClasses.text} hover:opacity-90`}
+                >
+                  {album.title}
+                </button>
+              );
+            })}
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
           <aside className="lg:col-span-5 flex">
             <div
@@ -101,11 +123,21 @@ export function AlbumsShelf({ data, onOpenAlbum, isDark, themeClasses }: AlbumsS
                 <SeasonCoverImage textMuted={t.textMuted} />
               </div>
               <div className="mt-5 flex-shrink-0">
-                <p className={`text-base font-semibold mb-2 ${t.textMuted}`}>
-                  Album Completion
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className={`text-base font-semibold ${t.textMuted}`}>
+                    Season progress
+                  </p>
+                  <span className={`text-base font-bold ${t.primary}`} aria-label={`${Math.round(seasonProgress * 100)} percent complete`}>
+                    {Math.round(seasonProgress * 100)}%
+                  </span>
+                </div>
                 <div
                   className={`h-5 rounded-full overflow-hidden border ${t.border} ${isDark ? 'bg-stone-800' : 'bg-stone-300/60'}`}
+                  role="progressbar"
+                  aria-valuenow={totalOwned}
+                  aria-valuemin={0}
+                  aria-valuemax={totalCards}
+                  aria-label="Season completion"
                 >
                   <div
                     className="h-full rounded-full transition-all duration-300 bg-amber-500"
@@ -123,9 +155,22 @@ export function AlbumsShelf({ data, onOpenAlbum, isDark, themeClasses }: AlbumsS
             <div
               className={`rounded-2xl border-2 p-6 shadow-xl w-full min-h-0 flex flex-col ${t.surface} ${t.border}`}
             >
-              <h3 className={`text-lg font-bold mb-5 ${t.primary}`}>
+              <h3 className={`text-lg font-bold mb-2 ${t.primary}`}>
                 Albums
               </h3>
+              {totalOwned === 0 && (
+                <p className={`text-sm mb-4 ${t.textMuted}`}>
+                  Add counts on the{' '}
+                  <button
+                    type="button"
+                    onClick={onNavigateTracker}
+                    className={`font-medium underline ${t.primary} hover:opacity-90`}
+                  >
+                    Tracker
+                  </button>
+                  {' '}to see progress here.
+                </p>
+              )}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 flex-1 min-h-0 content-start">
                 {CATALOG.map((album) => {
                   const slug = titleToSlug(album.title);
@@ -136,8 +181,16 @@ export function AlbumsShelf({ data, onOpenAlbum, isDark, themeClasses }: AlbumsS
                       key={album.title}
                       type="button"
                       onClick={() => onOpenAlbum(slug)}
-                      className={`group text-left rounded-xl border-2 overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 flex flex-col ${t.surface} ${t.border} focus-visible:ring-amber-500`}
+                      className={`group text-left rounded-xl border-2 overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 flex flex-col relative ${t.surface} ${t.border} focus-visible:ring-amber-500`}
                     >
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); onToggleFavorite(slug); }}
+                        className={`absolute top-2 right-2 z-10 w-8 h-8 rounded-full flex items-center justify-center text-lg ${favorites.includes(slug) ? 'bg-amber-500/90 text-amber-950' : isDark ? 'bg-stone-700/80 text-stone-400' : 'bg-stone-300/80 text-stone-500'} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-1`}
+                        aria-label={favorites.includes(slug) ? 'Remove from favorites' : 'Add to favorites'}
+                      >
+                        ★
+                      </button>
                       <div
                         className={`aspect-[3/4] flex items-center justify-center overflow-hidden border-b-2 p-2 ${t.border} ${isDark ? 'bg-stone-800/60' : 'bg-stone-200/80'}`}
                       >

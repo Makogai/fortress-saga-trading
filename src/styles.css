@@ -16,3 +16,34 @@
 .pb-safe {
   padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
 }
+
+/* Floating bar: above safe area on notched devices */
+.export-float-bottom {
+  bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* Reduced motion: respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus styles: visible outline for keyboard users */
+:focus {
+  outline: 2px solid transparent;
+}
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #d97706; /* amber-600 for visibility */
+  outline-offset: 2px;
+}

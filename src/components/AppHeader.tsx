@@ -20,6 +20,9 @@ interface AppHeaderProps {
   onFullImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onReset: () => void;
   onShare: () => void;
+  onDownloadBackup?: () => void;
+  onRestoreBackup?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  restoreBackupInputRef?: React.RefObject<HTMLInputElement>;
   importCountsInputRef: React.RefObject<HTMLInputElement>;
   fullImportInputRef: React.RefObject<HTMLInputElement>;
   titleClass: string;
@@ -51,6 +54,9 @@ export function AppHeader({
   onFullImport,
   onReset,
   onShare,
+  onDownloadBackup,
+  onRestoreBackup,
+  restoreBackupInputRef,
   importCountsInputRef,
   fullImportInputRef,
   titleClass,
@@ -107,9 +113,10 @@ export function AppHeader({
       />
 
       <header
-        className={`border-b sticky top-0 z-20 transition-colors ${
-          isDark ? 'border-stone-700/50 bg-stone-900/95' : 'border-stone-200 bg-white'
-        }`}
+        className="border-b border-white/10 sticky top-0 z-20 backdrop-blur-xl backdrop-saturate-150"
+        style={{
+          backgroundColor: isDark ? 'rgba(28, 25, 23, 0.8)' : 'rgba(250, 250, 249, 0.8)',
+        }}
       >
         <div className="container mx-auto px-4 py-3 sm:py-2.5">
           <div className="flex items-center justify-between gap-2">
@@ -160,6 +167,7 @@ export function AppHeader({
                 onClick={() => setTheme(isDark ? 'light' : 'dark')}
                 className={btnBase}
                 title={isDark ? 'Light mode' : 'Dark mode'}
+                aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {isDark ? '☀️' : '🌙'}
               </button>
@@ -203,6 +211,24 @@ export function AppHeader({
                         >
                           Full import
                         </button>
+                        {hasData && onDownloadBackup && (
+                          <button
+                            type="button"
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-stone-700/50"
+                            onClick={() => { onDownloadBackup(); setDropdownOpen(false); }}
+                          >
+                            Download backup
+                          </button>
+                        )}
+                        {onRestoreBackup && restoreBackupInputRef && (
+                          <button
+                            type="button"
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-stone-700/50"
+                            onClick={() => { restoreBackupInputRef.current?.click(); setDropdownOpen(false); }}
+                          >
+                            Restore backup
+                          </button>
+                        )}
                         {hasData && (
                           <button
                             type="button"
@@ -269,7 +295,7 @@ export function AppHeader({
                     {label}
                   </button>
                 ))}
-                <button type="button" onClick={() => setTheme(isDark ? 'light' : 'dark')} className={`rounded-xl px-4 py-3 text-sm min-h-[48px] ${btnBase}`}>
+                <button type="button" onClick={() => setTheme(isDark ? 'light' : 'dark')} className={`rounded-xl px-4 py-3 text-sm min-h-[48px] ${btnBase}`} aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}>
                   {isDark ? '☀️ Light' : '🌙 Dark'}
                 </button>
               </div>
@@ -286,7 +312,17 @@ export function AppHeader({
                     <button type="button" onClick={() => { triggerFullImport(); setMobileOpen(false); }} className={`${btnBase} w-full text-left py-3.5 px-4 rounded-xl min-h-[48px] text-sm`}>
                       Full import
                     </button>
-                    {hasData && (
+                    {hasData && onDownloadBackup && (
+                      <button type="button" onClick={() => { onDownloadBackup(); setMobileOpen(false); }} className={`${btnBase} w-full text-left py-3.5 px-4 rounded-xl min-h-[48px] text-sm`}>
+                        Download backup
+                      </button>
+                    )}
+                    {onRestoreBackup && restoreBackupInputRef && (
+                      <button type="button" onClick={() => { restoreBackupInputRef.current?.click(); setMobileOpen(false); }} className={`${btnBase} w-full text-left py-3.5 px-4 rounded-xl min-h-[48px] text-sm`}>
+                        Restore backup
+                      </button>
+                    )}
+                      {hasData && (
                       <button type="button" onClick={() => { onReset(); setMobileOpen(false); }} className={`${btnBase} w-full text-left py-3.5 px-4 rounded-xl min-h-[48px] text-sm text-red-400`}>
                         Reset
                       </button>

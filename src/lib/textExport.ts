@@ -27,22 +27,21 @@ function groupByAlbum<T extends { album: string }>(items: T[]): Map<string, T[]>
 
 export function buildTextExport(data: ParseResult): string {
   const lines: string[] = [];
-  lines.push('**Fortress Saga — Trading**');
-  lines.push('');
+  lines.push('**Fortress Saga — Trading**\n');
 
-  lines.push('**TRADE** (dupes — how many to trade)');
+  lines.push('**TRADE**');
   if (data.tradeList.length === 0) {
-    lines.push('_None_');
+    lines.push('_None_\n');
   } else {
     const byAlbum = groupByAlbum(data.tradeList);
     for (const [album, entries] of byAlbum) {
-      lines.push(`${album}`);
-      for (const e of entries) {
+      const parts = entries.map((e) => {
         const r = RARITY_EMOJI[e.rarity] ?? '🟢';
-        lines.push(`${r} **${e.name}** ${EMOJI.dupe}${e.count}`);
-      }
-      lines.push('');
+        return `${r} ${e.name} ×${e.count}`;
+      });
+      lines.push(`${album}: ${parts.join(', ')}`);
     }
+    lines.push('');
   }
 
   lines.push('**NEED**');
@@ -51,14 +50,13 @@ export function buildTextExport(data: ParseResult): string {
   } else {
     const byAlbum = groupByAlbum(data.needList);
     for (const [album, entries] of byAlbum) {
-      lines.push(`${album}`);
-      for (const e of entries) {
+      const parts = entries.map((e) => {
         const r = RARITY_EMOJI[e.rarity] ?? '🟢';
-        lines.push(`${r} **${e.name}**`);
-      }
-      lines.push('');
+        return `${r} ${e.name}`;
+      });
+      lines.push(`${album}: ${parts.join(', ')}`);
     }
   }
 
-  return lines.join('\n').replace(/\n{3,}/g, '\n\n');
+  return lines.join('\n');
 }

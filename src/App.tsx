@@ -6,7 +6,8 @@ import {
   setCardCount,
   type ParseResult,
 } from './parser/parseCards';
-import { defaultCounts, catalogToAlbums } from './data/catalog';
+import { defaultCounts, catalogToAlbums, CATALOG } from './data/catalog';
+import { titleToSlug } from './lib/albumSlug';
 import { loadFromStorage, saveToStorage } from './lib/storage';
 import { buildTextExport } from './lib/textExport';
 import { parseCountsOnly, applyCounts } from './lib/importCounts';
@@ -22,7 +23,19 @@ import { TradingOnlyPanel } from './components/TradingOnlyPanel';
 import { FormatGuide } from './components/FormatGuide';
 import { WelcomeModal, getWelcomeSeen } from './components/WelcomeModal';
 import { AppHeader } from './components/AppHeader';
+import { AlbumsShelf } from './pages/AlbumsShelf';
+import { AlbumDetail } from './pages/AlbumDetail';
 import './styles.css';
+
+type Route = 'tracker' | 'albums' | { page: 'album'; slug: string };
+
+function parseHash(): Route {
+  const h = typeof window !== 'undefined' ? window.location.hash.slice(1) : '';
+  if (h === '/albums') return 'albums';
+  const albumMatch = /^\/album\/([^/]+)$/.exec(h);
+  if (albumMatch) return { page: 'album', slug: albumMatch[1] };
+  return 'tracker';
+}
 
 type Theme = 'dark' | 'light';
 type ExportFormat = 'full' | 'trading' | 'text';
@@ -40,6 +53,7 @@ function getCleanSlate(): ParseResult {
 }
 
 export default function App() {
+  const [route, setRoute] = useState<Route>(() => parseHash());
   const [data, setData] = useState<ParseResult | null>(() => getCleanSlate());
   const [error, setError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -57,6 +71,12 @@ export default function App() {
   const tradingCaptureRef = useRef<HTMLDivElement>(null);
   const importCountsInputRef = useRef<HTMLInputElement>(null);
   const fullImportInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const onHash = () => setRoute(parseHash());
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
 
   const processText = useCallback((text: string) => {
     setError(null);
@@ -202,7 +222,101 @@ export default function App() {
   const isDark = theme === 'dark';
   const themeClasses = getThemeClasses(colorTheme, isDark);
   const primaryBtn = getPrimaryButtonClasses(colorTheme);
+  const albumSlug = route !== 'tracker' && route !== 'albums' ? route.slug : null;
+  const albumCatalogIndex =
+    albumSlug != null
+      ? CATALOG.findIndex((a) => titleToSlug(a.title) === albumSlug)
+      : -1;
+  const albumData =
+    albumCatalogIndex >= 0 && data ? data.albums[albumCatalogIndex] ?? null : null;
 
+  const openAlbum = useCallback((slug: string) => {
+    window.location.hash = `#/album/${slug}`;
+  }, []);
+  const goToAlbums = useCallback(() => {
+    window.location.hash = '#/albums';
+  }, []);
+  const goToTracker = useCallback(() => {
+    window.location.hash = '#';
+  }, []);
+
+  // Albums shelf page
+  if (route === 'albums') {
+    return (
+      <>
+        <AppHeader
+          isDark={isDark}
+          setTheme={setTheme}
+          colorTheme={colorTheme}
+          setColorTheme={setColorTheme}
+          primaryBtn={primaryBtn}
+          hasData={!!data}
+          editable={editable}
+          setEditable={setEditable}
+          shareDone={shareDone}
+          isReadOnly={isReadOnly}
+          onFormatGuide={() => setShowFormatGuide(true)}
+          onImportCounts={handleImportCounts}
+          onFullImport={handleFile}
+          onReset={handleResetToCleanSlate}
+          onShare={handleCopyShareLink}
+          importCountsInputRef={importCountsInputRef}
+          fullImportInputRef={fullImportInputRef}
+          titleClass={themeClasses.primary}
+          currentRoute={route}
+          onNavigateTracker={goToTracker}
+          onNavigateAlbums={goToAlbums}
+        />
+        <AlbumsShelf
+          data={data}
+          onOpenAlbum={openAlbum}
+          isDark={isDark}
+          themeClasses={themeClasses}
+        />
+      </>
+    );
+  }
+
+  // Single album detail page
+  if (albumSlug) {
+    return (
+      <>
+        <AppHeader
+          isDark={isDark}
+          setTheme={setTheme}
+          colorTheme={colorTheme}
+          setColorTheme={setColorTheme}
+          primaryBtn={primaryBtn}
+          hasData={!!data}
+          editable={editable}
+          setEditable={setEditable}
+          shareDone={shareDone}
+          isReadOnly={isReadOnly}
+          onFormatGuide={() => setShowFormatGuide(true)}
+          onImportCounts={handleImportCounts}
+          onFullImport={handleFile}
+          onReset={handleResetToCleanSlate}
+          onShare={handleCopyShareLink}
+          importCountsInputRef={importCountsInputRef}
+          fullImportInputRef={fullImportInputRef}
+          titleClass={themeClasses.primary}
+          currentRoute={route}
+          onNavigateTracker={goToTracker}
+          onNavigateAlbums={goToAlbums}
+        />
+        <AlbumDetail
+          slug={albumSlug}
+          albumData={albumData}
+          onBack={goToAlbums}
+          isDark={isDark}
+          themeClasses={themeClasses}
+          primaryBtn={primaryBtn}
+        />
+      </>
+    );
+  }
+
+  // Tracker page
   return (
     <div
       className={`min-h-screen transition-colors ${
@@ -228,6 +342,9 @@ export default function App() {
         importCountsInputRef={importCountsInputRef}
         fullImportInputRef={fullImportInputRef}
         titleClass={themeClasses.primary}
+        currentRoute="tracker"
+        onNavigateTracker={goToTracker}
+        onNavigateAlbums={goToAlbums}
       />
 
       {isReadOnly && (

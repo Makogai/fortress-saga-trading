@@ -17,6 +17,7 @@ const TRADE_BADGE: Record<ColorTheme, string> = {
   warm: 'bg-amber-500/80 text-amber-950',
   cool: 'bg-indigo-500/80 text-white',
   forest: 'bg-teal-500/80 text-white',
+  season: 'bg-[#D69858]/90 text-[#EAD7C2]',
 };
 
 interface CardTileProps {

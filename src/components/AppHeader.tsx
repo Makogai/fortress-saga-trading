@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { ColorTheme } from '../lib/themes';
 
 type Theme = 'dark' | 'light';
+type Route = 'tracker' | 'albums' | { page: 'album'; slug: string };
 
 interface AppHeaderProps {
   isDark: boolean;
@@ -22,12 +23,16 @@ interface AppHeaderProps {
   importCountsInputRef: React.RefObject<HTMLInputElement>;
   fullImportInputRef: React.RefObject<HTMLInputElement>;
   titleClass: string;
+  currentRoute: Route;
+  onNavigateTracker: () => void;
+  onNavigateAlbums: () => void;
 }
 
 const COLOR_THEMES: { value: ColorTheme; label: string }[] = [
   { value: 'warm', label: 'Warm' },
   { value: 'cool', label: 'Cool' },
   { value: 'forest', label: 'Forest' },
+  { value: 'season', label: 'Season' },
 ];
 
 export function AppHeader({
@@ -49,7 +54,12 @@ export function AppHeader({
   importCountsInputRef,
   fullImportInputRef,
   titleClass,
+  currentRoute,
+  onNavigateTracker,
+  onNavigateAlbums,
 }: AppHeaderProps) {
+  const isTracker = currentRoute === 'tracker';
+  const isAlbums = currentRoute === 'albums' || (typeof currentRoute === 'object' && currentRoute.page === 'album');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -103,10 +113,32 @@ export function AppHeader({
       >
         <div className="container mx-auto px-4 py-3 sm:py-2.5">
           <div className="flex items-center justify-between gap-2">
-            <h1 className={`text-base sm:text-lg font-bold truncate min-w-0 ${titleClass}`}>
-              Fortress Saga
-              <span className="hidden sm:inline opacity-90"> — Card Tracker</span>
-            </h1>
+            <div className="flex items-center gap-3 min-w-0">
+              <h1 className={`text-base sm:text-lg font-bold truncate ${titleClass}`}>
+                Fortress Saga
+                <span className="hidden sm:inline opacity-90"> — Card Tracker</span>
+              </h1>
+              <nav className="flex items-center gap-1 shrink-0" aria-label="Main">
+                <a
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); onNavigateTracker(); }}
+                  className={`rounded-md px-2 py-1 text-xs font-medium ${
+                    isTracker ? primaryBtn : isDark ? 'bg-stone-700/50 text-stone-400 hover:text-stone-200' : 'bg-stone-200/60 text-stone-500 hover:text-stone-700'
+                  }`}
+                >
+                  Tracker
+                </a>
+                <a
+                  href="#/albums"
+                  onClick={(e) => { e.preventDefault(); onNavigateAlbums(); }}
+                  className={`rounded-md px-2 py-1 text-xs font-medium ${
+                    isAlbums ? primaryBtn : isDark ? 'bg-stone-700/50 text-stone-400 hover:text-stone-200' : 'bg-stone-200/60 text-stone-500 hover:text-stone-700'
+                  }`}
+                >
+                  Albums
+                </a>
+              </nav>
+            </div>
 
             {/* Desktop: right side */}
             <div className="hidden md:flex items-center gap-2 flex-shrink-0">

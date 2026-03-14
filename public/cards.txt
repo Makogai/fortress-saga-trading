@@ -1,0 +1,95 @@
+Equipment Album
+U Caligo Pride, 1
+U Sky Dragonbone Sword, 1
+U Hero's Conviction, 1
+U Lucid Bells of Repentance, 0
+U Undying Blade Gloves, 1
+U Dark Void Staff, 0
+U burning Dusk Sky, 1
+R Judicator's Holy Teachings, 1
+R Peerless Golden Gauntlet, 1
+R Machina Missile X, 0
+
+Monster Album
+U Minions of the Void, 1
+U Frightened Kerothy, 1
+U Angry Tumbleweed, 1
+U Keen Zegurke, 2
+U Void Phantom, 1
+U Watcher Apistol, 2
+R Fobos of Oblivion, 2
+R Wasteland Drone, 1
+R Lantern Bat, 1
+E Ruins Shard, 1
+
+Petite Album
+U Petite Yaksha, 2
+U Petite Kubera, 1
+U Petite Luna, 1
+U Petite Tilly, 1
+U Petite Louis, 2
+R Petite Iris, 1
+R Petite Ravia, 2
+R Petite Ungula, 3
+E Petite Zelos, 1
+E Petite Vajra, 1
+
+Boss Album
+U Archmage Wisp Brothers, 1
+U Fairy Queen Wisp, 2
+U Cebras, 1
+U Fiance Sebastian, 2
+R Disguasting Ramulus, 1
+R Sunken Monaxia, 1
+R Chornum, 1
+E Vicious Vosek, 0
+E Deus Ex Machina, 1
+E Twilight Golem, 0
+
+Hero Album I
+U Stella, 3
+U Mael, 1
+U Bernhard, 1
+U Amber, 1
+R louis, 1
+R Elizabeth, 0
+R Soba, 1
+E Winter, 1
+E Solum, 1
+L Zelos, 0
+
+Fortress Album I
+U Spellcrafter Fortress, 2
+U Arcade Fortress, 1
+U Opera Fortress, 1
+R Aloha Fortress, 1
+R Golden Anvil Fortress, 2
+R Land Crusher Fortress, 1
+E Lion King Fortress, 1
+E Blooming Spring Fortress, 1
+L The Real Fortress, 0
+L Blue Sanctuary Fortress, 0
+
+Hero Album II
+U Violet, 1
+R Eclipse, 0
+R Kubera, 2
+R Iris, 1
+E Rei, 0
+E Styria, 1
+E Ruingaladh, 1
+L Tilly, 1
+L Valentine, 1
+L Lan Hua, 0
+
+Fortress Album II
+R Machina Fortress, 2
+R Christmas Fortress, 1
+R Paladin Fortress, 1
+E Battle Cruiser Fortress, 1
+E Abyssal Shadow Fortress, 1
+E Flower Guardian Fortress, 0
+L Devil's Castle Fortress, 1
+L Heavy Tank Fortress, 1
+L Halloween Fortress, 1
+L Frost Fang Fortress, 0

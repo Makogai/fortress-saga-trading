@@ -65,8 +65,8 @@ export function CardTile({ card, editable, colorTheme = 'warm', isDark = true, o
   const inputClass = isDark
     ? 'border-stone-500/50 bg-stone-900 text-stone-100'
     : 'border-stone-400 bg-white text-stone-800';
-  const tradeTextClass = colorTheme === 'cool' ? 'text-indigo-300' : colorTheme === 'forest' ? 'text-teal-300' : 'text-amber-400';
-  const tradeTextClassLight = colorTheme === 'cool' ? 'text-indigo-700' : colorTheme === 'forest' ? 'text-teal-700' : 'text-amber-700';
+  // const tradeTextClass = colorTheme === 'cool' ? 'text-indigo-300' : colorTheme === 'forest' ? 'text-teal-300' : 'text-amber-400';
+  // const tradeTextClassLight = colorTheme === 'cool' ? 'text-indigo-700' : colorTheme === 'forest' ? 'text-teal-700' : 'text-amber-700';
   const missingIconClass = isDark ? 'text-rose-400' : 'text-rose-600';
 
   return (

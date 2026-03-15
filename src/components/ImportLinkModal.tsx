@@ -35,17 +35,17 @@ export function ImportLinkModal({ onClose, onImport, isDark, themeClasses, prima
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 "
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="import-link-title"
     >
       <div
-        className={`rounded-2xl border-2 shadow-xl backdrop-blur-xl backdrop-saturate-150 w-full max-w-md overflow-hidden ${t.surface} ${t.border}`}
+        className={`rounded-2xl border shadow-2xl backdrop-blur-xl w-full max-w-md overflow-hidden glass-panel-solid ${t.surface} ${t.border}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-4 border-b border-stone-600/40">
+        <div className="p-5 border-b border-white/10">
           <h2 id="import-link-title" className={`text-lg font-bold ${t.text}`}>
             Import from share link
           </h2>
@@ -53,14 +53,14 @@ export function ImportLinkModal({ onClose, onImport, isDark, themeClasses, prima
             Paste a shared collection link to load its counts.
           </p>
         </div>
-        <form onSubmit={handleSubmit} className="p-4">
+        <form onSubmit={handleSubmit} className="p-5">
           <input
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://... #s=..."
-            className={`w-full rounded-lg border px-3 py-2.5 text-sm mb-3 ${
-              isDark ? 'bg-stone-800 border-stone-600 text-stone-100 placeholder-stone-500' : 'bg-white border-stone-300 text-stone-800 placeholder-stone-400'
+            placeholder="https://... or ?s=..."
+            className={`w-full rounded-xl border px-4 py-3 text-sm mb-3 transition-colors ${
+              isDark ? 'bg-white/5 border-white/20 text-stone-100 placeholder-stone-500 focus:border-amber-500/50' : 'bg-black/5 border-stone-300 text-stone-800 placeholder-stone-400 focus:border-amber-500/50'
             }`}
             aria-label="Share link URL"
             autoFocus
@@ -70,15 +70,15 @@ export function ImportLinkModal({ onClose, onImport, isDark, themeClasses, prima
               {message.text}
             </p>
           )}
-          <div className="flex gap-2 justify-end">
+          <div className="flex gap-3 justify-end">
             <button
               type="button"
               onClick={onClose}
-              className={`rounded-lg px-4 py-2 text-sm font-medium ${t.border} ${t.surfaceAlt} ${t.text}`}
+              className={`rounded-xl px-4 py-2.5 text-sm font-medium ${t.border} ${t.surfaceAlt} ${t.text} hover:opacity-90 transition-opacity`}
             >
               Cancel
             </button>
-            <button type="submit" className={`rounded-lg px-4 py-2 text-sm font-medium ${primaryBtn}`}>
+            <button type="submit" className={`rounded-xl px-4 py-2.5 text-sm font-medium shadow-sm ${primaryBtn}`}>
               Import
             </button>
           </div>

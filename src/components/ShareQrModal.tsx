@@ -31,20 +31,20 @@ export function ShareQrModal({ shareUrl, onClose, themeClasses, primaryBtn }: Sh
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="qr-modal-title"
     >
       <div
-        className={`rounded-2xl border-2 overflow-hidden max-w-xs w-full shadow-xl p-4 ${t.surface} ${t.border}`}
+        className={`rounded-2xl border overflow-hidden max-w-xs w-full shadow-2xl p-5 backdrop-blur-xl ${t.surface} ${t.border}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id="qr-modal-title" className={`text-lg font-bold mb-3 ${t.text}`}>
+        <h2 id="qr-modal-title" className={`text-lg font-bold mb-4 ${t.text}`}>
           Scan to open share link
         </h2>
-        <div className="flex justify-center bg-white p-3 rounded-lg mb-4">
+        <div className="flex justify-center bg-white p-4 rounded-xl mb-4 shadow-inner">
           {dataUrl ? (
             <img src={dataUrl} alt="QR code for share link" width={256} height={256} />
           ) : (

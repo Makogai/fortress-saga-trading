@@ -31,14 +31,14 @@ export function WelcomeModal({ onClose, isDark, onOpenFormatGuide }: WelcomeModa
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="welcome-title"
     >
       <div
-        className={`relative max-w-md w-full rounded-2xl border p-6 shadow-xl ${
-          isDark ? 'bg-stone-900 border-stone-600 text-stone-200' : 'bg-white border-stone-200 text-stone-800'
+        className={`relative max-w-md w-full rounded-2xl border p-6 shadow-2xl backdrop-blur-xl ${
+          isDark ? 'bg-stone-900/95 border-white/10 text-stone-200' : 'bg-white/95 border-stone-200/80 text-stone-800'
         }`}
       >
         <h2 id="welcome-title" className="text-xl font-bold mb-2">

@@ -21,7 +21,7 @@ export function TradingSummary({ tradeList, needList, themeClasses }: TradingSum
   const text = t?.text ?? 'text-stone-200';
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       <p className={`text-base md:text-xs mb-4 md:mb-2 text-center ${muted}`}>
         {tradeCount > 0 && needCount > 0 && (
           <span>
@@ -41,7 +41,7 @@ export function TradingSummary({ tradeList, needList, themeClasses }: TradingSum
         )}
       </p>
       <div className="flex flex-col md:flex-row gap-5 md:gap-3 justify-center items-stretch">
-        <section className={`rounded-xl border ${tradeSectionBorder} ${tradeSectionBg} p-5 md:p-3 flex-1`}>
+        <section className={`rounded-2xl border ${tradeSectionBorder} ${tradeSectionBg} p-5 md:p-4 flex-1 shadow-lg backdrop-blur-sm`}>
           <h3 className={`text-base md:text-sm font-bold ${tradeHeading} mb-3 md:mb-1.5`}>TRADE</h3>
           <ul className={`space-y-2 md:space-y-0.5 text-sm ${text}`}>
             {tradeList.length === 0 ? (
@@ -56,7 +56,7 @@ export function TradingSummary({ tradeList, needList, themeClasses }: TradingSum
             )}
           </ul>
         </section>
-        <section className={`rounded-xl border ${needSectionBorder} ${needSectionBg} p-5 md:p-3 flex-1`}>
+        <section className={`rounded-2xl border ${needSectionBorder} ${needSectionBg} p-5 md:p-4 flex-1 shadow-lg backdrop-blur-sm`}>
           <h3 className={`text-base md:text-sm font-bold ${needHeading} mb-3 md:mb-1.5`}>NEED</h3>
           <ul className={`space-y-2 md:space-y-0.5 text-sm ${text}`}>
             {needList.length === 0 ? (

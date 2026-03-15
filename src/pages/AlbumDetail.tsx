@@ -7,6 +7,8 @@ import type { RarityFilter } from '../lib/filterCards';
 import { cardMatches } from '../lib/filterCards';
 import type { CatalogAlbum } from '../data/catalog';
 import { titleToSlug, getCardImageUrl, getAlbumCoverUrl } from '../lib/albumSlug';
+import type { ColorTheme } from '../lib/themes';
+import { AlbumGrid } from '../components/AlbumGrid';
 
 const RARITY_BORDER: Record<string, string> = {
   U: 'border-green-500',
@@ -51,6 +53,9 @@ interface AlbumDetailProps {
   setSearchQuery: (q: string) => void;
   rarityFilter: RarityFilter;
   setRarityFilter: (r: RarityFilter) => void;
+  onCardCountChange?: (cardIndex: number, count: number) => void;
+  colorTheme?: ColorTheme;
+  isReadOnly?: boolean;
 }
 
 function CardImage({
@@ -85,8 +90,9 @@ function CardImage({
   );
 }
 
-export function AlbumDetail({ catalog, slug, albumData, onBack, onPrev, onNext, isFavorite, onToggleFavorite, isDark, themeClasses, primaryBtn, searchQuery, setSearchQuery, rarityFilter, setRarityFilter }: AlbumDetailProps) {
+export function AlbumDetail({ catalog, slug, albumData, onBack, onPrev, onNext, isFavorite, onToggleFavorite, isDark, themeClasses, primaryBtn, searchQuery, setSearchQuery, rarityFilter, setRarityFilter, onCardCountChange, colorTheme = 'warm', isReadOnly = false }: AlbumDetailProps) {
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
+  const [albumEditMode, setAlbumEditMode] = useState(false);
   const found = getAlbumBySlug(slug, catalog);
   const coverUrl = getAlbumCoverUrl(slug);
   const t = themeClasses;
@@ -109,7 +115,7 @@ export function AlbumDetail({ catalog, slug, albumData, onBack, onPrev, onNext, 
           <button
             type="button"
             onClick={onBack}
-            className={`mt-4 px-5 py-2.5 rounded-xl font-medium border-2 ${t.border} ${t.surfaceAlt} ${t.text} hover:opacity-90`}
+            className={`mt-4 px-5 py-2.5 rounded-xl font-semibold shadow-sm border ${t.border} ${t.surfaceAlt} ${t.text} hover:opacity-90 transition-opacity`}
           >
             Back to albums
           </button>
@@ -134,12 +140,12 @@ export function AlbumDetail({ catalog, slug, albumData, onBack, onPrev, onNext, 
     <div
       className={`min-h-screen pb-safe ${isDark ? 'bg-stone-950' : 'bg-stone-100'}`}
     >
-      <div className="container mx-auto px-5 py-6 max-w-6xl">
+      <div className="container mx-auto px-5 py-6 max-w-7xl">
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <button
             type="button"
             onClick={onBack}
-            className={`rounded-xl border-2 px-5 py-3 font-medium text-sm transition-opacity hover:opacity-90 ${primaryBtn}`}
+            className={`rounded-xl border px-5 py-3 font-semibold text-sm shadow-sm transition-opacity hover:opacity-90 ${primaryBtn}`}
             aria-label="Back to albums"
           >
             ← Albums
@@ -148,7 +154,7 @@ export function AlbumDetail({ catalog, slug, albumData, onBack, onPrev, onNext, 
             <button
               type="button"
               onClick={onPrev}
-              className={`rounded-xl border-2 px-4 py-3 font-medium text-sm transition-opacity hover:opacity-90 ${t.border} ${t.surfaceAlt} ${t.text}`}
+              className={`rounded-xl border px-4 py-3 font-medium text-sm transition-opacity hover:opacity-90 ${t.border} ${t.surfaceAlt} ${t.text}`}
               aria-label="Previous album"
             >
               ← Prev
@@ -158,14 +164,14 @@ export function AlbumDetail({ catalog, slug, albumData, onBack, onPrev, onNext, 
             <button
               type="button"
               onClick={onNext}
-              className={`rounded-xl border-2 px-4 py-3 font-medium text-sm transition-opacity hover:opacity-90 ${t.border} ${t.surfaceAlt} ${t.text}`}
+              className={`rounded-xl border px-4 py-3 font-medium text-sm transition-opacity hover:opacity-90 ${t.border} ${t.surfaceAlt} ${t.text}`}
               aria-label="Next album"
             >
               Next →
             </button>
           )}
           <div
-            className={`rounded-xl border-2 px-5 py-3 flex-1 min-w-0 flex items-center gap-3 ${t.surface} ${t.border}`}
+            className={`rounded-2xl border px-5 py-4 flex-1 min-w-0 flex items-center gap-3 shadow-sm ${t.surface} ${t.border}`}
           >
             {onToggleFavorite && (
               <button
@@ -177,7 +183,7 @@ export function AlbumDetail({ catalog, slug, albumData, onBack, onPrev, onNext, 
                 ★
               </button>
             )}
-            <h1 className={`text-xl font-bold truncate min-w-0 ${t.primary}`}>
+            <h1 className={`text-xl font-bold truncate min-w-0 tracking-tight ${t.primary}`}>
               {catalogAlbum.title}
             </h1>
             <div className="flex items-center gap-4 mt-3">
@@ -194,6 +200,15 @@ export function AlbumDetail({ catalog, slug, albumData, onBack, onPrev, onNext, 
               </span>
             </div>
           </div>
+          {onCardCountChange && !isReadOnly && (
+            <button
+              type="button"
+              onClick={() => setAlbumEditMode((m) => !m)}
+              className={`rounded-xl border px-4 py-3 font-medium text-sm shadow-sm transition-opacity hover:opacity-90 ${albumEditMode ? primaryBtn : `${t.border} ${t.surfaceAlt} ${t.text}`}`}
+            >
+              {albumEditMode ? 'Done' : 'Edit counts'}
+            </button>
+          )}
         </div>
 
         <div className={`mb-4 flex flex-wrap items-center gap-3 ${t.textMuted}`}>
@@ -202,8 +217,8 @@ export function AlbumDetail({ catalog, slug, albumData, onBack, onPrev, onNext, 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search cards…"
-            className={`rounded-lg border px-3 py-2 text-sm w-40 min-w-0 ${
-              isDark ? 'bg-stone-800 border-stone-600 text-stone-100' : 'bg-white border-stone-300 text-stone-800'
+            className={`rounded-xl border px-3.5 py-2.5 text-sm w-40 min-w-0 ${
+              isDark ? 'bg-white/5 border-white/10 text-stone-100' : 'bg-black/5 border-stone-200 text-stone-800'
             }`}
             aria-label="Filter by card name"
           />
@@ -212,7 +227,7 @@ export function AlbumDetail({ catalog, slug, albumData, onBack, onPrev, onNext, 
               key={r || 'all'}
               type="button"
               onClick={() => setRarityFilter(r)}
-              className={`rounded-lg px-2.5 py-1.5 text-xs font-medium ${rarityFilter === r ? primaryBtn : isDark ? 'bg-stone-700 hover:bg-stone-600' : 'bg-stone-200 hover:bg-stone-300'}`}
+              className={`rounded-lg px-3 py-2 text-xs font-medium transition-all duration-200 ${rarityFilter === r ? primaryBtn : isDark ? 'bg-white/5 text-stone-400 border border-white/5 hover:bg-white/10 hover:text-stone-200' : 'bg-black/5 text-stone-600 border border-stone-200/80 hover:bg-black/10 hover:text-stone-800'}`}
               aria-pressed={rarityFilter === r}
             >
               {r || 'All'}
@@ -220,38 +235,53 @@ export function AlbumDetail({ catalog, slug, albumData, onBack, onPrev, onNext, 
           ))}
         </div>
 
-        <div
-          className={`rounded-2xl border-2 p-4 sm:p-6 lg:p-8 shadow-xl overflow-hidden ${t.surface} ${t.border}`}
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 min-w-0">
-            <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-5 min-w-0 max-w-full" style={{ gridTemplateRows: 'auto auto' }}>
-              <div className="col-start-2 min-w-0">
-                {showCard(cards[0]) ? <AlbumCardSlot slug={slug} coverUrl={coverUrl} card={cards[0]} cardIndex={0} isDark={isDark} onCardClick={setSelectedCardIndex} /> : <AlbumPlaceholder isDark={isDark} />}
-              </div>
-              <div className="col-start-3 min-w-0">
-                {showCard(cards[1]) ? <AlbumCardSlot slug={slug} coverUrl={coverUrl} card={cards[1]} cardIndex={1} isDark={isDark} onCardClick={setSelectedCardIndex} /> : <AlbumPlaceholder isDark={isDark} />}
-              </div>
-              {[2, 3, 4].map((i) => (
-                <div key={i} className="min-w-0">
-                  {showCard(cards[i]) ? <AlbumCardSlot slug={slug} coverUrl={coverUrl} card={cards[i]} cardIndex={i} isDark={isDark} onCardClick={setSelectedCardIndex} /> : <AlbumPlaceholder isDark={isDark} />}
+        {albumEditMode && onCardCountChange ? (
+          <div className={`rounded-2xl border p-4 sm:p-6 shadow-lg ${t.surface} ${t.border}`}>
+            <AlbumGrid
+              album={{ title: catalogAlbum.title, cards }}
+              viewMode="full"
+              editable
+              colorTheme={colorTheme}
+              isDark={isDark}
+              onCardCountChange={onCardCountChange}
+              searchQuery={searchQuery}
+              rarityFilter={rarityFilter}
+            />
+          </div>
+        ) : (
+          <div
+            className={`rounded-2xl border-2 p-4 sm:p-6 lg:p-8 shadow-xl overflow-hidden ${t.surface} ${t.border}`}
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 min-w-0">
+              <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-5 min-w-0 max-w-full" style={{ gridTemplateRows: 'auto auto' }}>
+                <div className="col-start-2 min-w-0">
+                  {showCard(cards[0]) ? <AlbumCardSlot slug={slug} coverUrl={coverUrl} card={cards[0]} cardIndex={0} isDark={isDark} onCardClick={setSelectedCardIndex} /> : <AlbumPlaceholder isDark={isDark} />}
                 </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-5 min-w-0 max-w-full" style={{ gridTemplateRows: 'auto auto' }}>
-              <div className="col-start-2 min-w-0">
-                {showCard(cards[5]) ? <AlbumCardSlot slug={slug} coverUrl={coverUrl} card={cards[5]} cardIndex={5} isDark={isDark} onCardClick={setSelectedCardIndex} /> : <AlbumPlaceholder isDark={isDark} />}
-              </div>
-              <div className="col-start-3 min-w-0">
-                {showCard(cards[6]) ? <AlbumCardSlot slug={slug} coverUrl={coverUrl} card={cards[6]} cardIndex={6} isDark={isDark} onCardClick={setSelectedCardIndex} /> : <AlbumPlaceholder isDark={isDark} />}
-              </div>
-              {[7, 8, 9].map((i) => (
-                <div key={i} className="min-w-0">
-                  {showCard(cards[i]) ? <AlbumCardSlot slug={slug} coverUrl={coverUrl} card={cards[i]} cardIndex={i} isDark={isDark} onCardClick={setSelectedCardIndex} /> : <AlbumPlaceholder isDark={isDark} />}
+                <div className="col-start-3 min-w-0">
+                  {showCard(cards[1]) ? <AlbumCardSlot slug={slug} coverUrl={coverUrl} card={cards[1]} cardIndex={1} isDark={isDark} onCardClick={setSelectedCardIndex} /> : <AlbumPlaceholder isDark={isDark} />}
                 </div>
-              ))}
+                {[2, 3, 4].map((i) => (
+                  <div key={i} className="min-w-0">
+                    {showCard(cards[i]) ? <AlbumCardSlot slug={slug} coverUrl={coverUrl} card={cards[i]} cardIndex={i} isDark={isDark} onCardClick={setSelectedCardIndex} /> : <AlbumPlaceholder isDark={isDark} />}
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-5 min-w-0 max-w-full" style={{ gridTemplateRows: 'auto auto' }}>
+                <div className="col-start-2 min-w-0">
+                  {showCard(cards[5]) ? <AlbumCardSlot slug={slug} coverUrl={coverUrl} card={cards[5]} cardIndex={5} isDark={isDark} onCardClick={setSelectedCardIndex} /> : <AlbumPlaceholder isDark={isDark} />}
+                </div>
+                <div className="col-start-3 min-w-0">
+                  {showCard(cards[6]) ? <AlbumCardSlot slug={slug} coverUrl={coverUrl} card={cards[6]} cardIndex={6} isDark={isDark} onCardClick={setSelectedCardIndex} /> : <AlbumPlaceholder isDark={isDark} />}
+                </div>
+                {[7, 8, 9].map((i) => (
+                  <div key={i} className="min-w-0">
+                    {showCard(cards[i]) ? <AlbumCardSlot slug={slug} coverUrl={coverUrl} card={cards[i]} cardIndex={i} isDark={isDark} onCardClick={setSelectedCardIndex} /> : <AlbumPlaceholder isDark={isDark} />}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {selectedCardIndex !== null && cards[selectedCardIndex] && (

@@ -63,61 +63,95 @@ export function CardTile({ card, editable, colorTheme = 'warm', isDark = true, o
     : 'border-l-rose-500 border border-rose-400/60 bg-rose-50';
   const nameClass = isDark ? 'text-stone-100' : 'text-stone-800';
   const inputClass = isDark
-    ? 'border-stone-500/50 bg-stone-900 text-stone-100'
-    : 'border-stone-400 bg-white text-stone-800';
-  // const tradeTextClass = colorTheme === 'cool' ? 'text-indigo-300' : colorTheme === 'forest' ? 'text-teal-300' : 'text-amber-400';
-  // const tradeTextClassLight = colorTheme === 'cool' ? 'text-indigo-700' : colorTheme === 'forest' ? 'text-teal-700' : 'text-amber-700';
+    ? 'border-white/20 bg-white/10 text-stone-100 placeholder-stone-500 focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20'
+    : 'border-stone-300 bg-white text-stone-800 placeholder-stone-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20';
+  const stepBtnClass = isDark
+    ? 'bg-white/10 hover:bg-white/20 text-stone-300 active:bg-white/25'
+    : 'bg-stone-100 hover:bg-stone-200 text-stone-600 active:bg-stone-300';
+  const editControlBorder = isDark ? 'border-white/20' : 'border-stone-300';
   const missingIconClass = isDark ? 'text-rose-400' : 'text-rose-600';
+
+  const handleStep = (delta: number) => {
+    const next = Math.max(0, Math.min(99, card.count + delta));
+    onCountChange?.(next);
+  };
 
   return (
     <div
       className={`
         relative rounded-xl border flex flex-col justify-center border-l-4
+        shadow-sm transition-all duration-200
+        ${editable ? 'focus-within:shadow-md focus-within:ring-2 focus-within:ring-amber-500/25 focus-within:border-amber-500/40' : ''}
         ${isMissing ? `min-h-[3.5rem] md:min-h-[2.75rem] py-3 px-4 md:py-2.5 md:px-3 ${missingClasses}` : 'min-h-[3.5rem] md:min-h-[2.5rem]'}
         ${owned ? haveClasses : ''}
         ${isDuplicate ? tradeClasses : ''}
-        ${!isMissing ? 'md:rounded-lg' : ''}
+        ${!isMissing ? 'md:rounded-xl' : ''}
       `}
     >
-      <div className={`flex items-center gap-2 md:gap-1 flex-nowrap min-h-0 ${isMissing ? 'px-0 py-0' : 'px-3 md:px-1.5 py-2 md:py-1'}`}>
-        <span
-          className={`inline-flex shrink-0 rounded px-2 md:px-1 py-0.5 text-xs md:text-[10px] font-bold ${styles.badge}`}
-          title={getRarityLabel(card.rarity)}
-        >
-          {card.rarity}
-        </span>
-        <span className={`${nameClass} text-sm md:text-xs font-medium leading-snug break-words flex-1 min-w-0`}>
-          {card.name}
-        </span>
-        {isDuplicate && (
+      <div className={`flex flex-col min-h-0 ${isMissing ? 'px-0 py-0' : 'px-3 md:px-2 py-2 md:py-1.5'} ${editable ? 'gap-2' : ''}`}>
+        <div className={`flex items-start gap-2 md:gap-1.5 min-h-0 flex-1 ${!editable ? 'flex-nowrap' : ''}`}>
           <span
-            className={`shrink-0 rounded px-2 md:px-1.5 py-0.5 text-xs md:text-[10px] font-bold ${tradeBadge}`}
+            className={`inline-flex shrink-0 rounded-md px-2 md:px-1.5 py-0.5 text-xs md:text-[10px] font-bold ${styles.badge}`}
+            title={getRarityLabel(card.rarity)}
           >
-            TRADE ×{card.count - 1}
+            {card.rarity}
           </span>
-        )}
-        {isMissing && !editable && (
           <span
-            className={`${missingIconClass} text-lg md:text-sm shrink-0`}
-            title="Missing"
+            className={`${nameClass} text-sm md:text-xs font-medium leading-snug flex-1 min-w-0 break-words max-w-[10rem] md:max-w-[8rem]`}
+            title={card.name}
           >
-            ❌
+            {card.name}
           </span>
-        )}
+          {isDuplicate && !editable && (
+            <span
+              className={`shrink-0 rounded-md px-2 md:px-1.5 py-0.5 text-xs md:text-[10px] font-bold ${tradeBadge}`}
+            >
+              TRADE ×{card.count - 1}
+            </span>
+          )}
+          {isMissing && !editable && (
+            <span
+              className={`${missingIconClass} text-lg md:text-sm shrink-0`}
+              title="Missing"
+            >
+              ❌
+            </span>
+          )}
+        </div>
         {editable && (
-          <div className="shrink-0 flex items-center gap-0.5">
-            <input
-              type="number"
-              min={0}
-              max={99}
-              value={card.count}
-              onChange={(e) => {
-                const n = parseInt(e.target.value, 10);
-                if (!Number.isNaN(n) && n >= 0) onCountChange?.(n);
-              }}
-              className={`w-12 md:w-9 h-10 md:h-9 rounded-lg md:rounded border text-base md:text-xs text-center touch-manipulation ${inputClass}`}
-              aria-label={`Count for ${card.name}`}
-            />
+          <div className={`flex items-center justify-center shrink-0`}>
+            <div className={`flex items-center rounded-xl border overflow-hidden shadow-sm ${editControlBorder} ${isDark ? 'bg-white/5' : 'bg-stone-50'}`}>
+              <button
+                type="button"
+                onClick={() => handleStep(-1)}
+                disabled={card.count <= 0}
+                className={`flex items-center justify-center w-9 h-9 md:w-8 md:h-8 touch-manipulation disabled:opacity-40 disabled:pointer-events-none font-bold text-base ${stepBtnClass}`}
+                aria-label={`Decrease count for ${card.name}`}
+              >
+                −
+              </button>
+              <input
+                type="number"
+                min={0}
+                max={99}
+                value={card.count}
+                onChange={(e) => {
+                  const n = parseInt(e.target.value, 10);
+                  if (!Number.isNaN(n) && n >= 0) onCountChange?.(n);
+                }}
+                className={`w-11 md:w-9 h-9 md:h-8 text-center text-sm font-semibold touch-manipulation [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${inputClass}`}
+                aria-label={`Count for ${card.name}`}
+              />
+              <button
+                type="button"
+                onClick={() => handleStep(1)}
+                disabled={card.count >= 99}
+                className={`flex items-center justify-center w-9 h-9 md:w-8 md:h-8 touch-manipulation disabled:opacity-40 disabled:pointer-events-none font-bold text-base ${stepBtnClass}`}
+                aria-label={`Increase count for ${card.name}`}
+              >
+                +
+              </button>
+            </div>
           </div>
         )}
       </div>

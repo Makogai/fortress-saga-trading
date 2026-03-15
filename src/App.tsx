@@ -420,6 +420,9 @@ export default function App() {
   }, [data]);
 
   const isDark = theme === 'dark';
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark);
+  }, [isDark]);
   const themeClasses = getThemeClasses(colorTheme, isDark);
   const primaryBtn = getPrimaryButtonClasses(colorTheme);
   const albumSlug = route !== 'tracker' && route !== 'albums' ? route.slug : null;
@@ -466,6 +469,7 @@ export default function App() {
           hasData={!!data}
           editable={editable}
           setEditable={setEditable}
+          showEditCounts={false}
           shareDone={shareDone}
           isReadOnly={isReadOnly}
           onFormatGuide={() => setShowFormatGuide(true)}
@@ -495,7 +499,8 @@ export default function App() {
           themeClasses={themeClasses}
         />
         {savedToast && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-lg px-4 py-2 text-sm font-medium bg-stone-800 text-stone-100 shadow-lg border border-stone-600" role="status" aria-live="polite">
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold bg-stone-800/95 text-stone-100 shadow-xl border border-white/10 backdrop-blur-md" role="status" aria-live="polite">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400" aria-hidden>✓</span>
             Saved
           </div>
         )}
@@ -526,6 +531,7 @@ export default function App() {
           hasData={!!data}
           editable={editable}
           setEditable={setEditable}
+          showEditCounts={false}
           shareDone={shareDone}
           isReadOnly={isReadOnly}
           onFormatGuide={() => setShowFormatGuide(true)}
@@ -560,9 +566,13 @@ export default function App() {
           setSearchQuery={setSearchQuery}
           rarityFilter={rarityFilter}
           setRarityFilter={setRarityFilter}
+          onCardCountChange={albumCatalogIndex >= 0 && data ? (cardIndex, count) => handleCountChange(catalog[albumCatalogIndex].title, cardIndex, count) : undefined}
+          colorTheme={colorTheme}
+          isReadOnly={isReadOnly}
         />
         {savedToast && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-lg px-4 py-2 text-sm font-medium bg-stone-800 text-stone-100 shadow-lg border border-stone-600" role="status" aria-live="polite">
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold bg-stone-800/95 text-stone-100 shadow-xl border border-white/10 backdrop-blur-md" role="status" aria-live="polite">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400" aria-hidden>✓</span>
             Saved
           </div>
         )}
@@ -596,6 +606,7 @@ export default function App() {
         hasData={!!data}
         editable={editable}
         setEditable={setEditable}
+        showEditCounts
         shareDone={shareDone}
         isReadOnly={isReadOnly}
         onFormatGuide={() => setShowFormatGuide(true)}
@@ -617,8 +628,8 @@ export default function App() {
 
       {isReadOnly && (
         <div
-          className={`border-b px-4 py-3 sm:py-2 text-center text-sm ${
-            isDark ? 'bg-sky-950/40 border-sky-700/50 text-sky-200' : 'bg-sky-100 border-sky-200 text-sky-800'
+          className={`border-b px-4 py-3.5 sm:py-3 text-center text-sm font-medium ${
+            isDark ? 'bg-sky-950/30 border-sky-700/40 text-sky-200' : 'bg-sky-50 border-sky-200/80 text-sky-800'
           }`}
         >
           Viewing shared collection — read only. You can change view filters and export images or text.
@@ -650,9 +661,9 @@ export default function App() {
         />
       )}
 
-      <main className="container mx-auto px-5 sm:px-5 py-6 sm:py-6 max-w-6xl pb-safe">
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <label htmlFor="season-select" className={`text-sm font-medium ${themeClasses.textMuted}`}>
+      <main className="container mx-auto px-5 sm:px-5 py-6 sm:py-6 max-w-7xl pb-safe">
+        <div className="mb-5 flex flex-wrap items-center gap-3">
+          <label htmlFor="season-select" className={`text-sm font-semibold ${themeClasses.textMuted}`}>
             Season
           </label>
           <select
@@ -665,7 +676,7 @@ export default function App() {
                 saveCurrentSeasonId(id);
               }
             }}
-            className={`rounded-lg border px-3 py-2 text-sm ${themeClasses.border} ${themeClasses.surface} ${themeClasses.text}`}
+            className={`rounded-xl border px-4 py-2.5 text-sm font-medium shadow-sm ${themeClasses.border} ${themeClasses.surface} ${themeClasses.text}`}
             aria-label="Select season"
           >
             {SEASONS.map((s) => (
@@ -677,10 +688,10 @@ export default function App() {
         </div>
         {error && (
           <div
-            className={`mb-3 rounded border px-3 py-2 text-sm ${
+            className={`mb-4 rounded-xl border px-4 py-3 text-sm font-medium ${
               isDark
-                ? 'border-red-500/50 bg-red-950/20 text-red-300'
-                : 'border-red-400 bg-red-50 text-red-800'
+                ? 'border-red-500/40 bg-red-950/30 text-red-300'
+                : 'border-red-400/60 bg-red-50 text-red-800'
             }`}
           >
             {error}
@@ -689,11 +700,11 @@ export default function App() {
 
         {!data && (
           <div
-            className={`rounded-lg border p-6 text-center max-w-md mx-auto ${
-              isDark ? 'border-stone-600/50 bg-stone-900/40' : 'border-stone-300 bg-stone-200/60'
+            className={`rounded-2xl border p-8 text-center max-w-md mx-auto shadow-sm ${
+              isDark ? 'border-white/10 bg-stone-900/50' : 'border-stone-200 bg-stone-100/80'
             }`}
           >
-            <p className="text-stone-500 text-sm mb-3">
+            <p className={`text-sm mb-5 ${themeClasses.textMuted}`}>
               Enter card counts in the grid (Edit counts) or use <strong>Import counts</strong> with a file in the format from the Format guide.
             </p>
             <button
@@ -703,7 +714,7 @@ export default function App() {
                 setData(slate);
                 saveToStorage(currentSeasonId, { albums: slate.albums });
               }}
-              className={`rounded px-3 py-2 text-sm font-medium ${primaryBtn}`}
+              className={`rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm ${primaryBtn}`}
             >
               Start with clean slate
             </button>
@@ -729,18 +740,18 @@ export default function App() {
             </div>
             <div
               ref={fullCaptureRef}
-              className={`summary-capture rounded-xl border p-5 md:p-5 ${themeClasses.border} ${themeClasses.surface}`}
+              className={`summary-capture rounded-2xl border shadow-lg p-6 md:p-5 ${themeClasses.border} ${themeClasses.surface}`}
             >
               <div className={`mb-5 md:mb-4 pb-4 md:pb-3 border-b ${themeClasses.border}`}>
-                <span className={`block text-sm font-medium ${themeClasses.textMuted} mb-3 md:mb-2`}>View</span>
+                <span className={`block text-sm font-semibold ${themeClasses.textMuted} mb-3 md:mb-2`}>View</span>
                 <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3 md:gap-2">
                   {VIEW_MODES.map(({ value, label }) => (
                     <button
                       key={value}
                       type="button"
                       onClick={() => setViewMode(value)}
-                      className={`rounded-xl md:rounded-lg px-4 py-3 md:px-2 md:py-1 text-sm font-medium transition-colors min-h-[48px] md:min-h-0 touch-manipulation ${
-                        viewMode === value ? primaryBtn : isDark ? 'bg-stone-700 text-stone-300 hover:bg-stone-600' : 'bg-stone-200 text-stone-700 hover:bg-stone-300'
+                      className={`rounded-xl px-4 py-3 md:px-3 md:py-2 text-sm font-medium transition-all duration-200 min-h-[48px] md:min-h-0 touch-manipulation ${
+                        viewMode === value ? primaryBtn : isDark ? 'bg-white/5 text-stone-400 hover:bg-white/10 hover:text-stone-200 border border-white/5' : 'bg-black/5 text-stone-600 hover:bg-black/10 hover:text-stone-800 border border-stone-200/80'
                       }`}
                     >
                       {label}
@@ -755,8 +766,8 @@ export default function App() {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Card name…"
-                      className={`flex-1 min-w-0 rounded-lg border px-3 py-2 text-sm ${
-                        isDark ? 'bg-stone-800 border-stone-600 text-stone-100 placeholder-stone-500' : 'bg-white border-stone-300 text-stone-800 placeholder-stone-400'
+                      className={`flex-1 min-w-0 rounded-xl border px-3.5 py-2.5 text-sm ${
+                        isDark ? 'bg-white/5 border-white/10 text-stone-100 placeholder-stone-500 focus:border-amber-500/40' : 'bg-black/5 border-stone-200 text-stone-800 placeholder-stone-400 focus:border-amber-500/40'
                       }`}
                       aria-label="Filter by card name"
                     />
@@ -768,8 +779,8 @@ export default function App() {
                         key={r || 'all'}
                         type="button"
                         onClick={() => setRarityFilter(r)}
-                        className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                          rarityFilter === r ? primaryBtn : isDark ? 'bg-stone-700 text-stone-400 hover:bg-stone-600' : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
+                        className={`rounded-lg px-3 py-2 text-xs font-medium transition-all duration-200 ${
+                          rarityFilter === r ? primaryBtn : isDark ? 'bg-white/5 text-stone-400 hover:bg-white/10 border border-white/5' : 'bg-black/5 text-stone-600 hover:bg-black/10 border border-stone-200/80'
                         }`}
                         aria-pressed={rarityFilter === r}
                         aria-label={r ? `Filter by ${r}` : 'All rarities'}
@@ -811,12 +822,12 @@ export default function App() {
 
             <section
               ref={exportSectionRef}
-              className={`mt-7 md:mt-6 rounded-xl border p-5 md:p-4 ${themeClasses.border} ${themeClasses.surfaceAlt}`}
+              className={`mt-7 md:mt-6 rounded-2xl border shadow-sm p-6 md:p-5 ${themeClasses.border} ${themeClasses.surfaceAlt}`}
             >
               <h2 className={`text-base font-semibold ${themeClasses.textMuted} mb-4`}>
                 Copy / export for Discord
               </h2>
-              <div className={`rounded-xl border ${themeClasses.border} ${themeClasses.surfaceAlt} p-4 mb-4`}>
+              <div className={`rounded-xl border ${themeClasses.border} ${themeClasses.surface} p-4 mb-4`}>
                 <div className="mb-3">
                   <span className={`block text-sm ${themeClasses.textMuted} mb-2`}>Format</span>
                   <div className="flex flex-wrap gap-2">
@@ -986,7 +997,8 @@ export default function App() {
           </>
         )}
         {savedToast && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-lg px-4 py-2 text-sm font-medium bg-stone-800 text-stone-100 shadow-lg border border-stone-600" role="status" aria-live="polite">
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold bg-stone-800/95 text-stone-100 shadow-xl border border-white/10 backdrop-blur-md" role="status" aria-live="polite">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400" aria-hidden>✓</span>
             Saved
           </div>
         )}

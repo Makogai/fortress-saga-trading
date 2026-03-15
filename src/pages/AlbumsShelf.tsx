@@ -92,7 +92,7 @@ export function AlbumsShelf({ catalog, data, onOpenAlbum, onNavigateTracker, fav
     >
       <div className="container mx-auto px-5 py-6 max-w-7xl">
         {favorites.length > 0 && (
-          <div className={`mb-4 rounded-xl border-2 p-3 flex flex-wrap items-center gap-2 ${themeClasses.surface} ${themeClasses.border}`}>
+          <div className={`mb-5 rounded-2xl border p-4 flex flex-wrap items-center gap-2 shadow-sm ${themeClasses.surface} ${themeClasses.border}`}>
             <span className={`text-sm font-semibold ${themeClasses.primary}`}>Favorites</span>
             {favorites.map((slug) => {
               const album = catalog.find((a) => titleToSlug(a.title) === slug);
@@ -102,7 +102,7 @@ export function AlbumsShelf({ catalog, data, onOpenAlbum, onNavigateTracker, fav
                   key={slug}
                   type="button"
                   onClick={() => onOpenAlbum(slug)}
-                  className={`rounded-lg border px-3 py-1.5 text-sm font-medium ${themeClasses.border} ${themeClasses.surfaceAlt} ${themeClasses.text} hover:opacity-90`}
+                  className={`rounded-xl border px-4 py-2 text-sm font-medium transition-colors ${themeClasses.border} ${themeClasses.surfaceAlt} ${themeClasses.text} hover:opacity-90`}
                 >
                   {album.title}
                 </button>
@@ -113,13 +113,13 @@ export function AlbumsShelf({ catalog, data, onOpenAlbum, onNavigateTracker, fav
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
           <aside className="lg:col-span-5 flex">
             <div
-              className={`rounded-2xl border-2 p-6 shadow-xl flex flex-col w-full min-h-0 ${t.surface} ${t.border}`}
+              className={`rounded-2xl border p-6 shadow-lg flex flex-col w-full min-h-0 ${t.surface} ${t.border}`}
             >
-              <h2 className={`text-xl font-bold mb-4 ${t.primary}`}>
+              <h2 className={`text-xl font-bold mb-4 tracking-tight ${t.primary}`}>
                 {SEASON_TITLE}
               </h2>
               <div
-                className={`aspect-[4/3] rounded-xl border-2 overflow-hidden flex-shrink-0 ${t.border} ${isDark ? 'bg-stone-800/60' : 'bg-stone-200/80'}`}
+                className={`aspect-[4/3] rounded-xl border overflow-hidden flex-shrink-0 ${t.border} ${isDark ? 'bg-stone-800/60' : 'bg-stone-200/80'}`}
               >
                 <SeasonCoverImage textMuted={t.textMuted} />
               </div>
@@ -154,9 +154,9 @@ export function AlbumsShelf({ catalog, data, onOpenAlbum, onNavigateTracker, fav
 
           <section className="lg:col-span-7 flex">
             <div
-              className={`rounded-2xl border-2 p-6 shadow-xl w-full min-h-0 flex flex-col ${t.surface} ${t.border}`}
+              className={`rounded-2xl border p-6 shadow-lg w-full min-h-0 flex flex-col ${t.surface} ${t.border}`}
             >
-              <h3 className={`text-lg font-bold mb-2 ${t.primary}`}>
+              <h3 className={`text-lg font-bold mb-2 tracking-tight ${t.primary}`}>
                 Albums
               </h3>
               {totalOwned === 0 && (
@@ -182,18 +182,18 @@ export function AlbumsShelf({ catalog, data, onOpenAlbum, onNavigateTracker, fav
                       key={album.title}
                       type="button"
                       onClick={() => onOpenAlbum(slug)}
-                      className={`group text-left rounded-xl border-2 overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 flex flex-col relative ${t.surface} ${t.border} focus-visible:ring-amber-500`}
+                      className={`group text-left rounded-2xl border overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 flex flex-col relative ${t.surface} ${t.border} focus-visible:ring-amber-500`}
                     >
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); onToggleFavorite(slug); }}
-                        className={`absolute top-2 right-2 z-10 w-8 h-8 rounded-full flex items-center justify-center text-lg ${favorites.includes(slug) ? 'bg-amber-500/90 text-amber-950' : isDark ? 'bg-stone-700/80 text-stone-400' : 'bg-stone-300/80 text-stone-500'} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-1`}
+                        className={`absolute top-2 right-2 z-10 w-9 h-9 rounded-full flex items-center justify-center text-lg shadow-md ${favorites.includes(slug) ? 'bg-amber-500/90 text-amber-950' : isDark ? 'bg-stone-700/80 text-stone-400' : 'bg-stone-300/80 text-stone-500'} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-transform hover:scale-105`}
                         aria-label={favorites.includes(slug) ? 'Remove from favorites' : 'Add to favorites'}
                       >
                         ★
                       </button>
                       <div
-                        className={`aspect-[3/4] flex items-center justify-center overflow-hidden border-b-2 p-2 ${t.border} ${isDark ? 'bg-stone-800/60' : 'bg-stone-200/80'}`}
+                        className={`aspect-[3/4] flex items-center justify-center overflow-hidden border-b p-2 ${t.border} ${isDark ? 'bg-stone-800/60' : 'bg-stone-200/80'}`}
                       >
                         <AlbumCoverImage slug={slug} objectFit="contain" textMuted={t.textMuted} />
                       </div>

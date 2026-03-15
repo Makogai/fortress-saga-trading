@@ -29,8 +29,8 @@ export function GoalsPanel({ data, themeClasses, goals, onAddGoal, onRemoveGoal 
   );
 
   return (
-    <div className={`rounded-xl border p-4 ${t.border} ${t.surfaceAlt}`}>
-      <div className={`text-sm font-medium ${t.textMuted} mb-3`}>Goals</div>
+    <div className={`rounded-2xl border p-5 shadow-sm backdrop-blur-sm ${t.border} ${t.surfaceAlt}`}>
+      <div className={`text-sm font-semibold ${t.textMuted} mb-3`}>Goals</div>
       {goals.length === 0 ? (
         <p className={`text-sm ${t.textMuted}`}>No goals yet. Add an album to focus on.</p>
       ) : (
@@ -69,13 +69,13 @@ export function GoalsPanel({ data, themeClasses, goals, onAddGoal, onRemoveGoal 
         </ul>
       )}
       {albumTitlesAvailableForGoal.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-stone-600/40">
-          <label htmlFor="goals-add" className={`text-xs ${t.textMuted} block mb-1`}>
+        <div className="mt-4 pt-4 border-t border-inherit opacity-80">
+          <label htmlFor="goals-add" className={`text-xs font-medium ${t.textMuted} block mb-2`}>
             Add goal
           </label>
           <select
             id="goals-add"
-            className={`w-full max-w-xs rounded border px-2 py-1.5 text-sm ${t.border} ${t.surface} ${t.text}`}
+            className={`w-full max-w-xs rounded-xl border px-3 py-2 text-sm font-medium ${t.border} ${t.surface} ${t.text}`}
             value=""
             onChange={(e) => {
               const v = e.target.value;

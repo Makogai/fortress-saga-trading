@@ -27,7 +27,7 @@ export function StatsDashboard({ data, themeClasses, undoCount = 0, onUndo }: St
   const pct = totalCards > 0 ? Math.round((owned / totalCards) * 100) : 0;
 
   return (
-    <div className={`flex flex-wrap items-center gap-4 py-3 px-4 rounded-xl border ${t.border} ${t.surfaceAlt}`}>
+    <div className={`flex flex-wrap items-center gap-4 py-3 px-4 rounded-2xl border shadow-sm backdrop-blur-sm ${t.border} ${t.surfaceAlt}`}>
       <span className={`text-sm font-medium ${t.textMuted}`}>Stats</span>
       <span className={t.text}>
         <strong>{owned}</strong> owned

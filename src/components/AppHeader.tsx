@@ -13,6 +13,7 @@ interface AppHeaderProps {
   hasData: boolean;
   editable: boolean;
   setEditable: (e: boolean) => void;
+  showEditCounts?: boolean;
   shareDone: boolean;
   isReadOnly?: boolean;
   onFormatGuide: () => void;
@@ -48,6 +49,7 @@ export function AppHeader({
   hasData,
   editable,
   setEditable,
+  showEditCounts = true,
   shareDone,
   isReadOnly = false,
   onFormatGuide,
@@ -90,8 +92,8 @@ export function AppHeader({
     return () => document.removeEventListener('mousedown', close);
   }, [dropdownOpen]);
 
-  const btnBase = `rounded-lg px-3 py-2 text-sm font-medium transition-colors touch-manipulation ${
-    isDark ? 'bg-stone-700 text-stone-200 hover:bg-stone-600' : 'bg-stone-200 text-stone-700 hover:bg-stone-300'
+  const btnBase = `rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 touch-manipulation ${
+    isDark ? 'bg-white/10 text-stone-200 hover:bg-white/15 border border-white/10' : 'bg-black/5 text-stone-700 hover:bg-black/10 border border-stone-200/80'
   }`;
 
   const triggerImportCounts = () => importCountsInputRef.current?.click();
@@ -115,9 +117,10 @@ export function AppHeader({
       />
 
       <header
-        className="border-b border-white/10 sticky top-0 z-20 backdrop-blur-xl backdrop-saturate-150"
+        className="sticky top-0 z-20 border-b border-white/10 backdrop-blur-xl backdrop-saturate-150"
         style={{
-          backgroundColor: isDark ? 'rgba(28, 25, 23, 0.8)' : 'rgba(250, 250, 249, 0.8)',
+          backgroundColor: isDark ? 'rgba(28, 25, 23, 0.75)' : 'rgba(250, 250, 249, 0.8)',
+          boxShadow: isDark ? '0 1px 0 0 rgba(255,255,255,0.06)' : '0 1px 0 0 rgba(0,0,0,0.06)',
         }}
       >
         <div className="container mx-auto px-4 py-3 sm:py-2.5">
@@ -131,8 +134,8 @@ export function AppHeader({
                 <a
                   href="#"
                   onClick={(e) => { e.preventDefault(); onNavigateTracker(); }}
-                  className={`rounded-md px-2 py-1 text-xs font-medium ${
-                    isTracker ? primaryBtn : isDark ? 'bg-stone-700/50 text-stone-400 hover:text-stone-200' : 'bg-stone-200/60 text-stone-500 hover:text-stone-700'
+                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+                    isTracker ? primaryBtn : isDark ? 'bg-white/5 text-stone-400 hover:bg-white/10 hover:text-stone-200' : 'bg-black/5 text-stone-500 hover:bg-black/10 hover:text-stone-700'
                   }`}
                 >
                   Tracker
@@ -140,8 +143,8 @@ export function AppHeader({
                 <a
                   href="#/albums"
                   onClick={(e) => { e.preventDefault(); onNavigateAlbums(); }}
-                  className={`rounded-md px-2 py-1 text-xs font-medium ${
-                    isAlbums ? primaryBtn : isDark ? 'bg-stone-700/50 text-stone-400 hover:text-stone-200' : 'bg-stone-200/60 text-stone-500 hover:text-stone-700'
+                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+                    isAlbums ? primaryBtn : isDark ? 'bg-white/5 text-stone-400 hover:bg-white/10 hover:text-stone-200' : 'bg-black/5 text-stone-500 hover:bg-black/10 hover:text-stone-700'
                   }`}
                 >
                   Albums
@@ -157,7 +160,7 @@ export function AppHeader({
                   key={value}
                   type="button"
                   onClick={() => setColorTheme(value)}
-                  className={`rounded-md px-2 py-1 text-xs font-medium ${
+                  className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all duration-200 ${
                     colorTheme === value ? primaryBtn : btnBase
                   }`}
                 >
@@ -186,13 +189,13 @@ export function AppHeader({
                 </button>
                 {dropdownOpen && (
                   <div
-                    className={`absolute right-0 top-full mt-1 py-1 min-w-[160px] rounded-lg border shadow-lg ${
-                      isDark ? 'bg-stone-800 border-stone-600' : 'bg-white border-stone-200'
+                    className={`absolute right-0 top-full mt-2 py-1.5 min-w-[180px] rounded-xl border shadow-xl backdrop-blur-xl ${
+                      isDark ? 'bg-stone-900/95 border-white/10' : 'bg-white/95 border-stone-200/80'
                     }`}
                   >
                     <button
                       type="button"
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-stone-700/50"
+                      className="w-full text-left px-3 py-2.5 text-sm rounded-lg mx-1 hover:bg-white/10 transition-colors"
                       onClick={() => { onFormatGuide(); setDropdownOpen(false); }}
                     >
                       Format guide
@@ -201,14 +204,14 @@ export function AppHeader({
                       <>
                         <button
                           type="button"
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-stone-700/50"
+                          className="w-full text-left px-3 py-2.5 text-sm rounded-lg mx-1 hover:bg-white/10 transition-colors"
                           onClick={() => { triggerImportCounts(); setDropdownOpen(false); }}
                         >
                           Import counts
                         </button>
                         <button
                           type="button"
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-stone-700/50"
+                          className="w-full text-left px-3 py-2.5 text-sm rounded-lg mx-1 hover:bg-white/10 transition-colors"
                           onClick={() => { triggerFullImport(); setDropdownOpen(false); }}
                         >
                           Full import
@@ -216,7 +219,7 @@ export function AppHeader({
                         {onOpenImportLinkModal && (
                           <button
                             type="button"
-                            className="w-full text-left px-3 py-2 text-sm hover:bg-stone-700/50"
+                            className="w-full text-left px-3 py-2.5 text-sm rounded-lg mx-1 hover:bg-white/10 transition-colors"
                             onClick={() => { onOpenImportLinkModal(); setDropdownOpen(false); }}
                           >
                             Import from link
@@ -225,7 +228,7 @@ export function AppHeader({
                         {hasData && onDownloadBackup && (
                           <button
                             type="button"
-                            className="w-full text-left px-3 py-2 text-sm hover:bg-stone-700/50"
+                            className="w-full text-left px-3 py-2.5 text-sm rounded-lg mx-1 hover:bg-white/10 transition-colors"
                             onClick={() => { onDownloadBackup(); setDropdownOpen(false); }}
                           >
                             Download backup
@@ -234,7 +237,7 @@ export function AppHeader({
                         {onRestoreBackup && restoreBackupInputRef && (
                           <button
                             type="button"
-                            className="w-full text-left px-3 py-2 text-sm hover:bg-stone-700/50"
+                            className="w-full text-left px-3 py-2.5 text-sm rounded-lg mx-1 hover:bg-white/10 transition-colors"
                             onClick={() => { restoreBackupInputRef.current?.click(); setDropdownOpen(false); }}
                           >
                             Restore backup
@@ -260,15 +263,15 @@ export function AppHeader({
                   <button
                     type="button"
                     onClick={onShare}
-                    className={`rounded-lg px-3 py-2 text-sm font-medium ${primaryBtn}`}
+                    className={`rounded-xl px-4 py-2 text-sm font-medium shadow-sm ${primaryBtn}`}
                   >
                     {shareDone ? 'Copied!' : 'Share'}
                   </button>
-                  {!isReadOnly && (
+                  {showEditCounts && !isReadOnly && (
                     <button
                       type="button"
                       onClick={() => setEditable(!editable)}
-                      className={editable ? `rounded-lg px-3 py-2 text-sm font-medium ${primaryBtn}` : btnBase}
+                      className={editable ? `rounded-xl px-4 py-2 text-sm font-medium shadow-sm ${primaryBtn}` : btnBase}
                     >
                       {editable ? 'Done' : 'Edit counts'}
                     </button>
@@ -350,7 +353,7 @@ export function AppHeader({
                     <button type="button" onClick={() => { onShare(); setMobileOpen(false); }} className={`w-full py-3.5 px-4 rounded-xl min-h-[48px] text-sm font-medium ${primaryBtn}`}>
                       {shareDone ? 'Link copied!' : 'Share'}
                     </button>
-                    {!isReadOnly && (
+                    {showEditCounts && !isReadOnly && (
                       <button type="button" onClick={() => { setEditable(!editable); setMobileOpen(false); }} className={editable ? `w-full py-3.5 px-4 rounded-xl min-h-[48px] text-sm font-medium ${primaryBtn}` : `${btnBase} w-full text-left py-3.5 px-4 rounded-xl min-h-[48px] text-sm`}>
                         {editable ? 'Done editing' : 'Edit counts'}
                       </button>

@@ -126,10 +126,17 @@ export function AppHeader({
         <div className="container mx-auto px-4 py-3 sm:py-2.5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-3 min-w-0">
-              <h1 className={`text-base sm:text-lg font-bold truncate ${titleClass}`}>
-                Fortress Saga
-                <span className="hidden sm:inline opacity-90"> — Card Tracker</span>
-              </h1>
+              <div className="flex items-center gap-2 min-w-0">
+                <img
+                  src="/logo.svg"
+                  alt="Fortress Saga"
+                  className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0"
+                />
+                <h1 className={`text-base sm:text-lg font-bold truncate ${titleClass}`}>
+                  Fortress Saga
+                  <span className="hidden sm:inline opacity-90"> — Card Tracker</span>
+                </h1>
+              </div>
               <nav className="flex items-center gap-1 shrink-0" aria-label="Main">
                 <a
                   href="#"

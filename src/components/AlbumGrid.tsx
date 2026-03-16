@@ -16,6 +16,7 @@ interface AlbumGridProps {
   onCardCountChange?: (cardIndex: number, count: number) => void;
   searchQuery?: string;
   rarityFilter?: RarityFilter;
+  duplicatesOnly?: boolean;
 }
 
 /** Game layout: 2 pages, 5 per page. Each page: 2 centered on top, 3 centered on bottom. */
@@ -147,10 +148,11 @@ export function AlbumGrid({
   onCardCountChange,
   searchQuery = '',
   rarityFilter = '',
+  duplicatesOnly = false,
 }: AlbumGridProps) {
   const cards = album.cards;
   const filterMatch = (card: ParsedCard) =>
-    cardMatches(card, searchQuery, rarityFilter);
+    cardMatches(card, searchQuery, rarityFilter, duplicatesOnly);
   const page1 = PAGE1_INDICES.map((i) => cards[i]);
   const page2 = PAGE2_INDICES.map((i) => cards[i]);
   const titleClass =

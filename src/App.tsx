@@ -79,6 +79,7 @@ export default function App() {
   const [editable, setEditable] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [rarityFilter, setRarityFilter] = useState<RarityFilter>('');
+  const [duplicatesOnly, setDuplicatesOnly] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
   const [copyDone, setCopyDone] = useState(false);
   const [shareDone, setShareDone] = useState(false);
@@ -788,6 +789,20 @@ export default function App() {
                         {r || 'All'}
                       </button>
                     ))}
+                    <button
+                      type="button"
+                      onClick={() => setDuplicatesOnly((v) => !v)}
+                      className={`rounded-lg px-3 py-2 text-xs font-medium transition-all duration-200 ${
+                        duplicatesOnly
+                          ? primaryBtn
+                          : isDark
+                            ? 'bg-white/5 text-stone-400 hover:bg-white/10 border border-white/5'
+                            : 'bg-black/5 text-stone-600 hover:bg-black/10 border border-stone-200/80'
+                      }`}
+                      aria-pressed={duplicatesOnly}
+                    >
+                      Dupes only
+                    </button>
                   </div>
                 </div>
               </div>
@@ -808,6 +823,7 @@ export default function App() {
                     }
                     searchQuery={searchQuery}
                     rarityFilter={rarityFilter}
+                    duplicatesOnly={duplicatesOnly}
                   />
                 ))}
               </div>

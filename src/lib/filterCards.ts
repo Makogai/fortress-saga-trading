@@ -13,10 +13,20 @@ export function matchesRarity(card: ParsedCard, rarity: RarityFilter): boolean {
   return card.rarity === rarity;
 }
 
+export function matchesDuplicate(card: ParsedCard, duplicatesOnly: boolean): boolean {
+  if (!duplicatesOnly) return true;
+  return card.status === 'duplicate';
+}
+
 export function cardMatches(
   card: ParsedCard,
   searchQuery: string,
-  rarityFilter: RarityFilter
+  rarityFilter: RarityFilter,
+  duplicatesOnly = false
 ): boolean {
-  return matchesSearch(card, searchQuery) && matchesRarity(card, rarityFilter);
+  return (
+    matchesSearch(card, searchQuery) &&
+    matchesRarity(card, rarityFilter) &&
+    matchesDuplicate(card, duplicatesOnly)
+  );
 }
